@@ -1,6 +1,6 @@
 {
   "latest_version": "v9.65",
-  "apk_url": "/download/bmwhatsapp-v965.apk",
+  "apk_url": "/bmwhatsapp-v965.apk",
   "changelog": [
     "Anti-Ban system improved",
     "New iOS emoji pack",
@@ -9,11 +9,11 @@
   "old_versions": [
     {
       "version": "v9.64",
-      "apk_url": "/download/bmwhatsapp-v964.apk"
+      "apk_url": "/bmwhatsapp-v964.apk"
     },
     {
       "version": "v9.63",
-      "apk_url": "/download/bmwhatsapp-v963.apk"
+      "apk_url": "/bmwhatsapp-v963.apk"
     }
   ]
 }
