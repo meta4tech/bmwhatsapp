@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - BMWhatsApp</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <img src="assets/logo.png" class="logo" alt="BMWhatsApp" />
+    <span>Admin Panel - BMWhatsApp</span>
+    <button id="themeToggle">🌓</button>
+  </header>
+
+  <main>
+    <div id="adminAccess" style="display:none;">
+      <h2>Kelola Versi APK</h2>
+      <form id="apkForm">
+        <input type="text" id="variant" placeholder="Varian (misal: bmwhatsapp)" required />
+        <input type="text" id="version" placeholder="Versi (misal: v9.65)" required />
+        <input type="url" id="link" placeholder="Link Download APK" required />
+        <button type="submit" class="btn">Tambah Versi</button>
+      </form>
+
+      <h3>Data Versi</h3>
+      <table id="apkTable" border="1" style="width:100%;margin-top:10px;">
+        <thead><tr><th>Varian</th><th>Versi</th><th>Link</th><th>Aksi</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="denied" style="text-align:center;padding:40px;display:none;">
+      <h2>🔒 Akses Ditolak</h2>
+      <p>Anda tidak memiliki izin mengakses halaman ini.</p>
+    </div>
+  </main>
+
+  <script src="darkmode.js"></script>
+  <script>
+    const KEY = "admin123";
+    const params = new URLSearchParams(location.search);
+    const stored = localStorage.getItem("adminkey");
+
+    if (params.get("key") === KEY) {
+      localStorage.setItem("adminkey", KEY);
+      showAdmin();
+    } else if (stored === KEY) {
+      showAdmin();
+    } else {
+      document.getElementById("denied").style.display = "block";
+    }
+
+    function showAdmin() {
+      document.getElementById("adminAccess").style.display = "block";
+    }
+
+    const data = {
+      "bmwhatsapp": ["v9.60", "v9.65"],
+      "bmwhatsapp-msg": ["v9.60", "v9.65"],
+      "bmwhatsapp-ios": ["v9.60", "v9.65"],
+      "bmwhatsapp-x": ["v9.60", "v9.65"]
+    };
+
+    const tbody = document.querySelector("#apkTable tbody");
+
+    function refreshTable() {
+      tbody.innerHTML = "";
+      for (const [variant, versions] of Object.entries(data)) {
+        versions.forEach(version => {
+          const row = document.createElement("tr");
+          const link = `download/${variant}-${version}.apk`;
+          row.innerHTML = `<td>${variant}</td><td>${version}</td>
+            <td><a href="${link}" target="_blank">${link}</a></td>
+            <td><button onclick="removeVersion('${variant}', '${version}')">Hapus</button></td>`;
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    function removeVersion(variant, version) {
+      const index = data[variant].indexOf(version);
+      if (index !== -1) {
+        data[variant].splice(index, 1);
+        if (data[variant].length === 0) delete data[variant];
+        refreshTable();
+      }
+    }
+
+    document.getElementById("apkForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const variant = document.getElementById("variant").value;
+      const version = document.getElementById("version").value;
+      if (!data[variant]) data[variant] = [];
+      if (!data[variant].includes(version)) {
+        data[variant].push(version);
+        refreshTable();
+      }
+    });
+
+    refreshTable();
+  </script>
+</body>
+</html>
