@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - BMWhatsApp</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .container { max-width: 600px; margin: 30px auto; background: white; padding: 20px; border-radius: 10px; }
+    input, select { width: 100%; padding: 10px; margin: 5px 0 15px; }
+    .hidden { display: none; }
+    .apk-list li { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    button { background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container" id="login-container">
+    <h2>Login Admin</h2>
+    <input type="password" id="adminPassword" placeholder="Enter admin password">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div class="container hidden" id="admin-panel">
+    <h2>Upload APK</h2>
+    <form id="uploadForm">
+      <label>Varian:</label>
+      <select id="variant">
+        <option value="bmwhatsapp">BMWhatsApp</option>
+        <option value="bmwhatsapp-msg">BMWhatsApp Messenger</option>
+        <option value="bmwhatsapp-ios">BMWhatsApp iOS</option>
+        <option value="bmwhatsapp-x">BMWhatsApp X</option>
+      </select>
+      <label>Versi:</label>
+      <input type="text" id="version" placeholder="Contoh: v9.70" required>
+      <label>File APK:</label>
+      <input type="file" id="apkFile" required>
+      <button type="submit">Upload</button>
+    </form>
+
+    <h2>List Versi APK</h2>
+    <ul class="apk-list" id="apkList">
+      <!-- List versi akan ditampilkan di sini -->
+    </ul>
+  </div>
+
+  <script>
+    const PASSWORD = "adminbm"; // password admin
+    function login() {
+      const input = document.getElementById('adminPassword').value;
+      if (input === PASSWORD) {
+        document.getElementById('login-container').classList.add('hidden');
+        document.getElementById('admin-panel').classList.remove('hidden');
+        loadAPKList();
+      } else {
+        alert("Password salah!");
+      }
+    }
+
+    function loadAPKList() {
+      fetch('apk.json').then(res => res.json()).then(data => {
+        const list = document.getElementById("apkList");
+        list.innerHTML = '';
+        for (const variant in data.variants) {
+          data.variants[variant].forEach(item => {
+            const li = document.createElement("li");
+            li.innerHTML = `${variant} - ${item.version} <a href="${item.apk_url}" target="_blank">Download</a>`;
+            list.appendChild(li);
+          });
+        }
+      });
+    }
+
+    document.getElementById("uploadForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("Fitur upload langsung belum aktif di versi offline ini. Nanti disiapkan backend Firebase atau Vercel Blob.");
+    });
+  </script>
+</body>
+</html>
