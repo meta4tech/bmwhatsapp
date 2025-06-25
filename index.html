@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BMWhatsApp - Download APK</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <img src="logo.png" class="logo" alt="BMWhatsApp" />
+    <span>BMWhatsApp Official Website</span>
+    <button id="themeToggle">🌓</button>
+  </header>
+  <main>
+    <input type="text" id="searchInput" placeholder="🔍 Cari versi (misal: v9.65)" style="padding:10px;width:100%;max-width:600px;margin:10px auto;display:block;">
+    <div class="grid" id="variantGrid"></div>
+  </main>
+  <script>
+    const data = {
+      "bmwhatsapp": ["v9.60", "v9.65"],
+      "bmwhatsapp-msg": ["v9.60", "v9.65"],
+      "bmwhatsapp-ios": ["v9.60", "v9.65"],
+      "bmwhatsapp-x": ["v9.60", "v9.65"]
+    };
+    const grid = document.getElementById("variantGrid");
+    function generateCards(filter = "") {
+      grid.innerHTML = "";
+      for (const [variant, versions] of Object.entries(data)) {
+        const card = document.createElement("div");
+        card.className = "card";
+        const title = variant.replace("bmwhatsapp", "BMWhatsApp").replace("-", " ").toUpperCase();
+        card.innerHTML = `<h3>${title}</h3><ul>` + versions
+          .filter(v => v.toLowerCase().includes(filter))
+          .map(v => `<li>📂 ${v} <a href="${variant}-${v}.apk" class="btn">Download</a></li>`)
+          .join("") + "</ul>";
+        if (card.querySelectorAll("li").length > 0) grid.appendChild(card);
+      }
+    }
+    document.getElementById("searchInput").addEventListener("input", function () {
+      generateCards(this.value.toLowerCase());
+    });
+    generateCards();
+  </script>
+  <script src="darkmode.js"></script>
+</body>
+</html>
