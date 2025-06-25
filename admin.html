@@ -1,104 +1,109 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Admin Panel - BMWhatsApp</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    input, select { width: 100%; padding: 10px; margin: 8px 0; }
+    button { padding: 10px 15px; margin-top: 10px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    ul li { margin: 8px 0; display: flex; justify-content: space-between; }
+  </style>
 </head>
 <body>
-  <header>
-    <img src="assets/logo.png" class="logo" alt="BMWhatsApp" />
-    <span>Admin Panel - BMWhatsApp</span>
-    <button id="themeToggle">🌓</button>
-  </header>
+<div class="container">
+  <h2>Admin BMWhatsApp</h2>
 
-  <main>
-    <div id="adminAccess" style="display:none;">
-      <h2>Kelola Versi APK</h2>
-      <form id="apkForm">
-        <input type="text" id="variant" placeholder="Varian (misal: bmwhatsapp)" required />
-        <input type="text" id="version" placeholder="Versi (misal: v9.65)" required />
-        <input type="url" id="link" placeholder="Link Download APK" required />
-        <button type="submit" class="btn">Tambah Versi</button>
-      </form>
+  <label>Varian:</label>
+  <select id="variant">
+    <option value="bmwhatsapp">BMWhatsApp</option>
+    <option value="bmwhatsapp-msg">BMWhatsApp Messenger</option>
+    <option value="bmwhatsapp-ios">BMWhatsApp iOS</option>
+    <option value="bmwhatsapp-x">BMWhatsApp X</option>
+  </select>
 
-      <h3>Data Versi</h3>
-      <table id="apkTable" border="1" style="width:100%;margin-top:10px;">
-        <thead><tr><th>Varian</th><th>Versi</th><th>Link</th><th>Aksi</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  <label>Versi:</label>
+  <input type="text" id="version" placeholder="Contoh: v9.70" />
 
-    <div id="denied" style="text-align:center;padding:40px;display:none;">
-      <h2>🔒 Akses Ditolak</h2>
-      <p>Anda tidak memiliki izin mengakses halaman ini.</p>
-    </div>
-  </main>
+  <label>Link APK:</label>
+  <input type="url" id="apk_url" placeholder="https://..." />
 
-  <script src="darkmode.js"></script>
-  <script>
-    const KEY = "admin123";
-    const params = new URLSearchParams(location.search);
-    const stored = localStorage.getItem("adminkey");
+  <button onclick="uploadAPK()">Tambah Versi</button>
 
-    if (params.get("key") === KEY) {
-      localStorage.setItem("adminkey", KEY);
-      showAdmin();
-    } else if (stored === KEY) {
-      showAdmin();
-    } else {
-      document.getElementById("denied").style.display = "block";
-    }
+  <h3>Daftar Versi</h3>
+  <ul id="apkList"></ul>
+</div>
 
-    function showAdmin() {
-      document.getElementById("adminAccess").style.display = "block";
-    }
+<script>
+const GITHUB_USERNAME = "meta4tech";
+const GITHUB_REPO = "bmwhatsapp-admin";
+const FILE_PATH = "apk.json";
+const GITHUB_TOKEN = "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"; // ← isi token GitHub kamu di sini
 
-    const data = {
-      "bmwhatsapp": ["v9.60", "v9.65"],
-      "bmwhatsapp-msg": ["v9.60", "v9.65"],
-      "bmwhatsapp-ios": ["v9.60", "v9.65"],
-      "bmwhatsapp-x": ["v9.60", "v9.65"]
-    };
+let sha = "";
 
-    const tbody = document.querySelector("#apkTable tbody");
+async function getAPKData() {
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
+    headers: { Authorization: "Bearer " + GITHUB_TOKEN }
+  });
+  const json = await res.json();
+  sha = json.sha;
+  const content = JSON.parse(atob(json.content));
+  renderAPKList(content.variants);
+  return content;
+}
 
-    function refreshTable() {
-      tbody.innerHTML = "";
-      for (const [variant, versions] of Object.entries(data)) {
-        versions.forEach(version => {
-          const row = document.createElement("tr");
-          const link = `download/${variant}-${version}.apk`;
-          row.innerHTML = `<td>${variant}</td><td>${version}</td>
-            <td><a href="${link}" target="_blank">${link}</a></td>
-            <td><button onclick="removeVersion('${variant}', '${version}')">Hapus</button></td>`;
-          tbody.appendChild(row);
-        });
-      }
-    }
-
-    function removeVersion(variant, version) {
-      const index = data[variant].indexOf(version);
-      if (index !== -1) {
-        data[variant].splice(index, 1);
-        if (data[variant].length === 0) delete data[variant];
-        refreshTable();
-      }
-    }
-
-    document.getElementById("apkForm").addEventListener("submit", e => {
-      e.preventDefault();
-      const variant = document.getElementById("variant").value;
-      const version = document.getElementById("version").value;
-      if (!data[variant]) data[variant] = [];
-      if (!data[variant].includes(version)) {
-        data[variant].push(version);
-        refreshTable();
-      }
+function renderAPKList(data) {
+  const list = document.getElementById("apkList");
+  list.innerHTML = "";
+  for (const variant in data) {
+    data[variant].forEach(item => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span>${variant} - ${item.version}</span> <a href="${item.apk_url}" target="_blank">Download</a>`;
+      list.appendChild(li);
     });
+  }
+}
 
-    refreshTable();
-  </script>
+async function uploadAPK() {
+  const variant = document.getElementById("variant").value;
+  const version = document.getElementById("version").value.trim();
+  const apk_url = document.getElementById("apk_url").value.trim();
+
+  if (!version || !apk_url) return alert("Isi semua kolom!");
+
+  const oldData = await getAPKData();
+
+  const newEntry = { version, apk_url };
+  if (!oldData.variants[variant]) oldData.variants[variant] = [];
+  oldData.variants[variant].push(newEntry);
+
+  const updatedContent = btoa(JSON.stringify(oldData, null, 2));
+
+  const updateRes = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
+    method: "PUT",
+    headers: {
+      Authorization: "Bearer " + GITHUB_TOKEN,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: `add ${variant} ${version}`,
+      content: updatedContent,
+      sha
+    })
+  });
+
+  if (updateRes.ok) {
+    alert("Versi ditambahkan!");
+    getAPKData();
+  } else {
+    alert("Gagal mengupdate file.");
+  }
+}
+
+getAPKData();
+</script>
 </body>
 </html>
