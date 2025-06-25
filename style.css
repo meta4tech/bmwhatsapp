@@ -1,7 +1,0 @@
-
-body { font-family: sans-serif; background: #f2f2f2; margin: 0; padding: 0; }
-header, footer { background: #4CAF50; color: white; padding: 20px; text-align: center; }
-.btn { display: inline-block; background: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }
-ul { list-style: none; padding-left: 0; }
-li { margin: 5px 0; }
-details { background: white; margin: 10px auto; max-width: 600px; padding: 10px; border-radius: 6px; }
