@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BMWhatsApp Tema iOS v1.1.0</title>
+  <meta name="description" content="BMWhatsApp Tema iOS v1.1.0 – Mod WhatsApp bergaya iOS dengan fitur bot internal, proteksi, fake tools, unlimited forward, HD media, dan paket premium mulai 20k." />
+  <style>
+    :root {
+      --ios-blue: #0a84ff;
+      --ios-blue-light: #5ac8fa;
+      --ios-green: #30d158;
+      --ios-orange: #ff9f0a;
+      --ios-red: #ff3b30;
+      --ios-gray-1: #f7f9fb;
+      --ios-gray-2: #f0f1f4;
+      --ios-gray-3: #e1e3e8;
+      --ios-gray-4: #8e8e93;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --shadow-lg: 0 10px 32px rgba(0,0,0,.12);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,.06);
+      --trans-fast: all .18s ease;
+      --content-max: 860px;
+    }*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  background:var(--ios-gray-1);
+  color:#1c1c1e;
+  line-height:1.5;
+}
+
+/* Hero -------------------------------------------------- */
+.hero{
+  background:linear-gradient(135deg,var(--ios-blue) 0%,var(--ios-blue-light) 100%);
+  color:#fff;
+  padding:64px 24px 80px;
+  text-align:center;
+}
+.hero h1{
+  margin:0 0 8px;
+  font-size:clamp(2rem,5vw,2.75rem);
+  font-weight:700;
+  letter-spacing:-.25px;
+}
+.hero .version-label{
+  display:inline-block;
+  margin-top:8px;
+  padding:4px 12px;
+  background:rgba(255,255,255,.15);
+  border-radius:999px;
+  font-size:.875rem;
+  backdrop-filter:blur(8px);
+}
+.hero p{
+  margin:16px auto 0;
+  max-width:480px;
+  font-size:1rem;
+  opacity:.95;
+}
+
+/* Card Container ---------------------------------------- */
+.content-wrapper{
+  width:100%;
+  max-width:var(--content-max);
+  margin:-48px auto 96px; /* overlap hero */
+  padding:0 16px;
+}
+.card{
+  background:#fff;
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg);
+  padding:32px 32px 40px;
+  margin-bottom:32px;
+}
+.card h2{
+  margin-top:0;
+  font-size:1.5rem;
+  font-weight:700;
+  color:#1c1c1e;
+}
+.card p.subtitle{margin-top:4px;margin-bottom:24px;font-style:italic;color:var(--ios-gray-4);}
+
+/* Changelog list ---------------------------------------- */
+.changelog-list{list-style:none;margin:0;padding:0;}
+.changelog-list li{margin:0 0 20px;padding-left:0;}
+.changelog-list li b{display:block;font-weight:600;color:#1c1c1e;}
+.changelog-list li i{display:block;font-style:italic;color:var(--ios-gray-4);margin-top:2px;}
+
+/* Fake Tag sublist */
+.fake-tag-list{margin-top:4px;margin-left:16px;padding-left:16px;border-left:2px solid var(--ios-gray-3);list-style:none;}
+.fake-tag-list li{margin-bottom:4px;font-style:italic;color:var(--ios-gray-4);}
+
+/* Pricing ------------------------------------------------ */
+.pricing-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:16px;
+  margin-top:24px;
+}
+.price-card{
+  background:var(--ios-gray-2);
+  border-radius:var(--radius-md);
+  padding:24px 16px;
+  text-align:center;
+  box-shadow:var(--shadow-sm);
+  transition:var(--trans-fast);
+}
+.price-card:hover{transform:translateY(-2px) scale(1.01);box-shadow:var(--shadow-md);}
+.price-card .tier{font-weight:700;font-size:1.125rem;margin-bottom:4px;}
+.price-card .amount{font-size:1.5rem;font-weight:700;color:var(--ios-blue);margin-bottom:4px;}
+.price-card .duration{font-size:.875rem;color:var(--ios-gray-4);margin-bottom:8px;}
+.price-card.premium .amount{color:var(--ios-green);} /* highlight premium */
+.price-card.reseller{background:rgba(255,159,10,.1);}
+.price-card.reseller .amount{color:var(--ios-orange);}  
+
+.price-note{margin-top:24px;padding:16px 20px;background:#fff7e5;border-left:6px solid var(--ios-orange);border-radius:var(--radius-md);font-size:.95rem;line-height:1.4;}
+.price-note b{display:block;margin-bottom:4px;}
+
+/* CTA Buttons ------------------------------------------- */
+.cta-wrap{text-align:center;margin-top:40px;}
+.cta-btn{
+  display:inline-block;
+  margin:8px;
+  padding:14px 28px;
+  font-size:1rem;
+  font-weight:600;
+  color:#fff;
+  background:var(--ios-blue);
+  border-radius:999px;
+  text-decoration:none;
+  transition:var(--trans-fast);
+}
+.cta-btn:hover{opacity:.9;transform:translateY(-1px);}  
+.cta-btn.secondary{background:var(--ios-green);}  
+.cta-btn.reseller{background:var(--ios-orange);}  
+
+/* Footer ------------------------------------------------- */
+footer{margin:96px 0 48px;text-align:center;font-size:.85rem;color:var(--ios-gray-4);}  
+footer a{color:var(--ios-blue);text-decoration:none;font-weight:600;}  
+footer a:hover{text-decoration:underline;}  
+
+/* Responsive tweaks */
+@media (max-width:480px){
+  .card{padding:24px 20px;}
+  .price-card{padding:20px 12px;}
+}
+
+  </style>
+</head>
+<body>
+  <!-- HERO -->
+  <header class="hero">
+    <h1>BMWhatsApp Tema iOS</h1>
+    <div class="version-label">Versi 1.1.0</div>
+    <p>Mod WhatsApp bergaya iOS dengan fitur premium, bot internal, proteksi bug, dan kontrol penuh privasi.</p>
+  </header>  <main class="content-wrapper">
+    <!-- CHANGELOG CARD -->
+    <section class="card" id="changelog">
+      <h2>Changelog Utama</h2>
+    
+      <ul class="changelog-list">
+<li><b>Bot internal</b>
+          <ul class="list-fitur-bot">
+            <li>!setnama — Ganti nama grup</li>
+            <li>!setdesk — Ganti deskripsi grup</li>
+            <li>!promote @user — Tambahkan admin</li>
+            <li>!unadmin @user — Hapus hak admin</li>
+          </ul>
+        </li>
+        <li><b>Anti Delay Maker</b><i> pesan yang menyebabkan delay tidak akan perpengaruh.</i></li>
+        <li><b>Anti Bug SW</b><i>Hapus status WhatsApp yang berbahaya.</i></li>
+        <li><b>Anti Bug New</b><i>Anti bug terbaru.</i></li>
+        <li><b>Fake View Status</b><i>Seolah dilihat ratusan orang — jumlah bisa diatur di pengaturan mod.</i></li>
+        <li><b>Fake Tanggal Pembuatan Grup</b><i>Edit tanggal grup sesuka kamu.</i></li>
+        <li><b>Fake Nomor WhatsApp</b><i>Tampilkan nomor palsu di info profil.</i></li>
+        <li><b>ExternalAdReply</b><i>Kirim pesan dengan label “via Web”.</i></li>
+        <li><b>Message AI</b><i>Kirim pesan dengan label “AI”.</i></li>
+        <li><b>Hide Tag (TagAll)</b><i> TagAll, support grup dan chat pribadi</i></li>
+        <li><b>Fake Tag Reply</b>
+          <ul class="fake-tag-list">
+            <li>metai • group</li>
+            <li>metai • status</li>
+            <li>whatsapp • group</li>
+            <li>whatsapp • status</li>
+          </ul>
+        </li>
+        <li><b>Fake Chat Official</b><i>Buat obrolan palsu yang terlihat meyakinkan.</i></li>
+        <li><b>Unlimited Tag Grup Status</b><i>Mention semua anggota tanpa batas.</i></li>
+        <li><b>Unlimited Teruskan Pesan</b><i>Hilangkan limit forward WhatsApp.</i></li>
+        <li><b>Anti Pesan Sementara</b><i>Pesan tetap ada meskipun timer aktif.</i></li>
+        <li><b>HD Media Quality</b><i>Kirim foto & video tanpa kompresi.</i></li>
+        </b><i>Dan masih banyak fitur keren lainya yang tidak ada di list</i></li>
+       
+      </ul>
+       <div class="price-note">
+    <b>Gratis Update:</b>
+    Selama masa premium kamu masih aktif, semua update versi BMWhatsApp Tema iOS berikutnya gratis.
+  </div>
+    </section><!-- PRICING CARD -->
+<section class="card" id="pricing">
+  <h2>Paket VIP & Reseller</h2>
+  <p class="subtitle">Pilih durasi sesuai kebutuhan. Update gratis jika masa premium aktif.</p>
+  <div class="pricing-grid">
+    <div class="price-card basic">
+      <div class="tier">Basic</div>
+      <div class="amount">20k</div>
+      <div class="duration">1 Bulan</div>
+    </div>
+    <div class="price-card standard">
+      <div class="tier">Standard</div>
+      <div class="amount">50k</div>
+      <div class="duration">3 Bulan</div>
+    </div>
+    <div class="price-card premium premium">
+      <div class="tier">Premium</div>
+      <div class="amount">100k</div>
+      <div class="duration">1 Tahun</div>
+    </div>
+    <div class="price-card reseller reseller">
+      <div class="tier">Reseller</div>
+      <div class="amount">200k</div>
+      <div class="duration">Lifetime*</div>
+    </div>
+  </div>
+  <div class="price-note">
+    <b>Keterangan Reseller:</b>
+    Reseller bebas menjual ulang aplikasi kepada pelanggan sendiri dengan batas distribusi tertentu (sesuai kebijakan admin). Harga jual tidak boleh di bawah harga pasaran / paket Basic.
+  </div>
+</section>
+
+<!-- CTA CARD -->
+<section class="card" id="contact">
+  <h2>Hubungi & Akses</h2>
+  <div class="cta-wrap">
+    <a class="cta-btn" href="https://t.me/bukan_mastah_id" target="_blank" rel="noopener">Channel Telegram</a>
+    <a class="cta-btn secondary" href="https://youtube.com/@bukan_mastah?si=maKgrOVJVBKvEV60" target="_blank" rel="noopener">Youtube</a>
+    <a class="cta-btn reseller" href="https://t.me/bukan_mastah_owner" target="_blank" rel="noopener">Beli Reseller</a>
+  </div>
+</section>
+
+  </main>  <footer>
+    &copy; <span id="year"></span> BMWhatsApp. Semua hak dilindungi.
+  </footer>  <script>
+    // Update footer year
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script></body>
+</html>
