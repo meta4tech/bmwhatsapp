@@ -1,0 +1,37 @@
+[
+  {
+    "id": "cmt-1",
+    "name": "Andi",
+    "rating": 5,
+    "comment": "Aplikasinya keren banget, ringan dan cepat!",
+    "timestamp": "2025-07-20T10:30:00Z"
+  },
+  {
+    "id": "cmt-2",
+    "name": "Budi",
+    "rating": 4,
+    "comment": "Cocok banget buat WA mod, tampilannya juga rapi.",
+    "timestamp": "2025-07-20T11:12:00Z"
+  },
+  {
+    "id": "cmt-3",
+    "name": "Citra",
+    "rating": 3,
+    "comment": "Fitur oke tapi kadang force close. Semoga diperbaiki.",
+    "timestamp": "2025-07-20T12:05:00Z"
+  },
+  {
+    "id": "cmt-4",
+    "name": "Dede",
+    "rating": 5,
+    "comment": "Mantap! Fitur lengkap dan stabil.",
+    "timestamp": "2025-07-20T13:20:00Z"
+  },
+  {
+    "id": "cmt-5",
+    "name": "Euis",
+    "rating": 4,
+    "comment": "Desainnya bagus dan tidak ribet, saya suka.",
+    "timestamp": "2025-07-20T13:45:00Z"
+  }
+]
