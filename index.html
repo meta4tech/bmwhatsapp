@@ -13,16 +13,18 @@
       color: #fff;
       display: flex;
       align-items: center;
+      justify-content: flex-start;
       flex-direction: column;
+      min-height: 100vh;
       padding: 20px;
     }
 
     h1 {
       font-size: 28px;
       font-weight: 800;
+      margin-bottom: 10px;
       color: #00ffe1;
       text-align: center;
-      margin-bottom: 10px;
     }
 
     .tagline {
@@ -34,13 +36,13 @@
 
     .card {
       max-width: 500px;
-      width: 100%;
       background: #1b1f29;
       border-radius: 20px;
       box-shadow: 0 0 25px rgba(0,0,0,0.3);
       padding: 30px;
       margin-bottom: 30px;
       text-align: center;
+      width: 100%;
     }
 
     .title {
@@ -100,15 +102,6 @@
       color: #ccc;
       text-align: center;
     }
-
-    textarea, input, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-top: 10px;
-      font-family: inherit;
-    }
   </style>
 </head>
 <body>
@@ -116,10 +109,10 @@
   <h1>Download BMWhatsApp</h1>
   <p class="tagline">Pilih varian yang sesuai dengan kebutuhanmu</p>
 
-  <!-- Versi 1 -->
+  <!-- BMWhatsApp Messenger -->
   <div class="card">
     <div class="title">BMWhatsApp Messenger</div>
-    <a class="download-btn" href="https://your-download-link.com/bmwhatsapp-messenger.apk" download>📥 Download</a>
+    <a class="download-btn" href="https://www.youtube.com/@bukan_mastah" download>📥 Download</a>
     <div class="info">
       <p>📦 <strong>Versi:</strong> 9.90 Stable</p>
       <p>🕓 <strong>Update:</strong> 17 Juli 2025</p>
@@ -127,29 +120,28 @@
     </div>
   </div>
 
-  <!-- Versi 2 -->
+  <!-- BMWhatsApp Thema iOS -->
   <div class="card">
-    <div class="title">BMWhatsApp Thema iOS</div>
-    <a class="download-btn" href="https://your-download-link.com/bmwhatsapp-ios.apk" download>📥 Download</a>
+    <div class="title">BMWhatsApp SIX</div>
+    <a class="download-btn" href="https://bmwhatsapp.vercel.app/six.html" download>📥 Download</a>
     <div class="info">
-      <p>📦 <strong>Versi:</strong> 1.1.0</p>
-      <p>🕓 <strong>Update:</strong> 17 Juli 2025</p>
-      <p>💾 <strong>Ukuran:</strong> 48MB</p>
+      <p>📦 <strong>Versi:</strong> 1.1.0 iOS Theme</p>
+      <p>🕓 <strong>Update:</strong> 22 Juli 2025</p>
+      <p>💾 <strong>Ukuran:</strong> 81,89M</p>
     </div>
   </div>
 
-  <!-- Versi 3 -->
+  <!-- BMWhatsAppX -->
   <div class="card">
     <div class="title">BMWhatsAppX</div>
-    <a class="download-btn" href="https://your-download-link.com/bmwhatsappx.apk" download>📥 Download</a>
+    <a class="download-btn" href="" download>📥 Download</a>
     <div class="info">
-      <p>📦 <strong>Versi:</strong> X1.0</p>
+      <p>📦 <strong>Versi:</strong> X1.0 Experimental</p>
       <p>🕓 <strong>Update:</strong> 17 Juli 2025</p>
       <p>💾 <strong>Ukuran:</strong> 55MB</p>
     </div>
   </div>
 
-  <!-- Premium -->
   <div class="premium-note">
     🔓 <strong>Ingin Premium?</strong><br>
     <ul style="padding-left: 20px; margin-top: 8px;">
@@ -161,120 +153,13 @@
     Reseller bebas jual aplikasinya dengan batas tertentu, harga tidak boleh di bawah pasaran.
   </div>
 
-  <a href="https://wa.me/628xxxxxxx" class="download-btn" style="margin-top: 25px; background: #25D366; color: white;">
+  <a href="https://wa.me/message/GJOAHAJO2MIVK1" class="download-btn" style="margin-top: 25px; background: #25D366; color: white;">
     💬 Beli Premium via WhatsApp
   </a>
-
-  <!-- Komentar dan Rating -->
-  <div class="card">
-    <div class="title">Komentar & Rating</div>
-    <select id="rating">
-      <option value="5">⭐️⭐️⭐️⭐️⭐️ (5)</option>
-      <option value="4">⭐️⭐️⭐️⭐️ (4)</option>
-      <option value="3">⭐️⭐️⭐️ (3)</option>
-      <option value="2">⭐️⭐️ (2)</option>
-      <option value="1">⭐️ (1)</option>
-    </select>
-    <input id="username" type="text" placeholder="Nama kamu">
-    <textarea id="comment" placeholder="Tulis komentar..." rows="3"></textarea>
-    <button onclick="addComment()" class="download-btn">💬 Kirim Komentar</button>
-    <div id="commentList" style="margin-top: 25px; text-align: left;"></div>
-  </div>
 
   <footer>
     &copy; 2025 BMWhatsApp. Powered by BukanMastah.
   </footer>
 
-<script>
-  const GITHUB_OWNER = 'meta4tech'; // Ganti dengan username kamu
-  const GITHUB_REPO = 'bmwhatsapp'; // Ganti dengan nama repo kamu
-  const FILE_PATH = 'comments.json';
-  const TOKEN = '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'; // Token GitHub kamu
-
-  async function fetchComments() {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`);
-    const data = await res.json();
-    const content = atob(data.content);
-    const comments = JSON.parse(content);
-    renderComments(comments, data.sha);
-  }
-
-  function renderComments(comments, sha) {
-    const commentList = document.getElementById("commentList");
-    commentList.innerHTML = "";
-    comments.forEach((data, index) => {
-      const div = document.createElement("div");
-      div.style = "background: #262c3a; padding: 10px; border-radius: 10px; margin-bottom: 10px;";
-      div.innerHTML = `
-        <strong>${data.name}</strong> – ${"⭐️".repeat(data.rating)}<br>
-        <p style="margin: 5px 0;">${data.comment}</p>
-        <button onclick="deleteComment(${index}, '${sha}')" style="background:#e74c3c; color:#fff; border:none; padding:5px 10px; border-radius:6px; cursor:pointer;">🗑 Hapus</button>
-      `;
-      commentList.appendChild(div);
-    });
-  }
-
-  async function addComment() {
-    const name = document.getElementById("username").value.trim();
-    const comment = document.getElementById("comment").value.trim();
-    const rating = parseInt(document.getElementById("rating").value);
-    if (!name || !comment) return alert("Isi semua kolom.");
-
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-      headers: { Authorization: `token ${TOKEN}` }
-    });
-    const fileData = await res.json();
-    const content = atob(fileData.content);
-    const comments = JSON.parse(content);
-    comments.unshift({ name, comment, rating, timestamp: new Date().toISOString() });
-
-    await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `token ${TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: `Add comment from ${name}`,
-        content: btoa(JSON.stringify(comments, null, 2)),
-        sha: fileData.sha
-      })
-    });
-
-    document.getElementById("username").value = "";
-    document.getElementById("comment").value = "";
-    fetchComments();
-  }
-
-  async function deleteComment(index, sha) {
-    const password = prompt("Masukkan password admin:");
-    if (password !== "bmwa") return alert("Password salah.");
-
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-      headers: { Authorization: `token ${TOKEN}` }
-    });
-    const fileData = await res.json();
-    const content = atob(fileData.content);
-    const comments = JSON.parse(content);
-    comments.splice(index, 1);
-
-    await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${FILE_PATH}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `token ${TOKEN}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: `Delete comment index ${index}`,
-        content: btoa(JSON.stringify(comments, null, 2)),
-        sha: fileData.sha
-      })
-    });
-
-    fetchComments();
-  }
-
-  document.addEventListener("DOMContentLoaded", fetchComments);
-</script>
 </body>
 </html>
