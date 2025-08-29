@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Reseller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .login-container {
+      max-width: 400px;
+      margin: 50px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .login-container h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 30px;
+    }
+    .panel-container {
+      display: none;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 250px;
+      background: #2c3e50;
+      color: white;
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-content {
+      flex: 1;
+    }
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #34495e;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar li {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .sidebar li:hover, .sidebar li.active {
+      background: #34495e;
+    }
+    .sidebar li i {
+      margin-right: 10px;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+      margin-top: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    table th, table td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    table th {
+      background: #007bff;
+      color: white;
+    }
+    tr:hover {
+      background: #f1f1f1;
+    }
+    .form-container {
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 4px;
+    }
+    input, select, button {
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .delete-btn {
+      background: #e74c3c;
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+    .delete-btn:hover {
+      background: #c0392b;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .hidden {
+      display: none;
+    }
+    .section-title {
+      color: #2c3e50;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #007bff;
+      margin-bottom: 20px;
+    }
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .stat-card h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+    .stat-card p {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 0;
+    }
+    .coin-info {
+      text-align: center;
+      font-size: 18px;
+      margin: 20px 0;
+    }
+    .coin-count {
+      font-weight: bold;
+      color: #f39c12;
+    }
+    .usage-info {
+      font-size: 14px;
+      color: #7f8c8d;
+      margin-top: 5px;
+    }
+    .reseller-id-display {
+      background: #34495e;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    .action-btns {
+      display: flex;
+      gap: 5px;
+    }
+    .status-active {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+    .status-expired {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    /* Styling untuk chat */
+    .chat-container {
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      height: 70vh;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      background: #f8f9fa;
+    }
+    .message {
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 18px;
+      max-width: 80%;
+      word-wrap: break-word;
+      position: relative;
+    }
+    .message-owner {
+      background: #007bff;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    .message-reseller {
+      background: #e9ecef;
+      color: #333;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
+    .message-sender {
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-bottom: 5px;
+    }
+    .message-time {
+      font-size: 0.7rem;
+      text-align: right;
+      margin-top: 5px;
+      opacity: 0.7;
+    }
+    .chat-input-container {
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      resize: none;
+    }
+    .chat-send-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-send-btn:hover {
+      background: #0069d9;
+    }
+    .delete-message-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .message:hover .delete-message-btn {
+      display: flex;
+    }
+    .delete-message-btn:hover {
+      background: rgba(231, 76, 60, 0.8);
+    }
+    .message.deleted {
+      opacity: 0.6;
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .message.deleted .message-text::after {
+      content: " (Pesan telah dihapus)";
+      font-style: italic;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+  <!-- Login Form -->
+  <div id="loginForm" class="login-container">
+    <h1>Login Reseller</h1>
+    <form id="loginFormElement">
+      <div class="form-group">
+        <label for="deviceId">ID Device Reseller</label>
+        <input type="text" id="deviceId" placeholder="Masukkan ID device Anda" required>
+      </div>
+      <button type="submit">Masuk</button>
+    </form>
+  </div>
+
+  <!-- Reseller Panel -->
+  <div id="resellerPanel" class="panel-container">
+    <div class="container">
+      <div class="sidebar">
+          <h2>Panel Reseller</h2>
+          <div class="reseller-id-display">
+            <i class="fas fa-user"></i> <span id="displayResellerId"></span>
+          </div>
+          <ul>
+            <li class="active" onclick="showSection('dashboard')">
+              <i class="fas fa-tachometer-alt"></i> Dashboard
+            </li>
+            <li onclick="showSection('addUser')">
+              <i class="fas fa-user-plus"></i> Tambah User
+            </li>
+            <li onclick="showSection('userList')">
+              <i class="fas fa-users"></i> Daftar User
+            </li>
+            <li onclick="showSection('coinInfo')">
+              <i class="fas fa-coins"></i> Info Coin
+            </li>
+            <li onclick="showSection('groupChat')">
+              <i class="fas fa-comments"></i> Percakapan Grup
+            </li>
+          </ul>
+      </div>
+      
+      <div class="main-content">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="content-section">
+          <h1 class="section-title">Dashboard Reseller</h1>
+          <div class="coin-info">
+            Sisa Coin Anda: <span class="coin-count" id="remainingCoin">0</span>
+            <div class="usage-info">1 Coin = 1 User (Maks 3 user/hari)</div>
+          </div>
+          <div class="stats-container">
+            <div class="stat-card" style="border-left: 4px solid #3498db;">
+              <h3>Total User</h3>
+              <p id="totalUsers">0</p>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #2ecc71;">
+              <h3>User Aktif</h3>
+              <p id="activeLicenses">0</p>
+            </div>
+            <div class="stat-card" style="border-left: 4px solid #e74c3c;">
+              <h3>User Expired</h3>
+              <p id="expiredLicenses">0</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Add User Section -->
+        <div id="addUser" class="content-section hidden">
+          <h1 class="section-title">Tambah User Baru</h1>
+          <div class="coin-info">
+            Sisa Coin Anda: <span class="coin-count" id="addUserRemainingCoin">0</span>
+            <div class="usage-info" id="dailyLimitInfo"></div>
+          </div>
+          <div class="form-container">
+            <form id="addUserForm">
+              <div class="form-group">
+                <label for="id">Device ID</label>
+                <input type="text" id="id" placeholder="Masukkan device ID" required>
+              </div>
+              <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Masukkan username" required>
+              </div>
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input type="text" id="password" placeholder="Masukkan password" required>
+              </div>
+              <div class="form-group">
+                <label for="expiresAt">Tanggal Expired (maks 1 bulan)</label>
+                <input type="date" id="expiresAt" required>
+              </div>
+              <div class="form-group">
+                <label for="allowOffline">Akses Offline</label>
+                <select id="allowOffline">
+                  <option value="true">Diizinkan</option>
+                  <option value="false">Tidak Diizinkan</option>
+                </select>
+              </div>
+              <button type="submit" id="submitBtn">Tambah User</button>
+            </form>
+          </div>
+        </div>
+        
+        <!-- User List Section -->
+        <div id="userList" class="content-section hidden">
+          <h1 class="section-title">Daftar User Anda</h1>
+          <div class="table-container">
+            <table id="usersTable">
+              <thead>
+                <tr>
+                  <th>Device ID</th>
+                  <th>Username</th>
+                  <th>Password</th>
+                  <th>Tanggal Expired</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
+                <!-- Data akan diisi oleh JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Coin Info Section -->
+        <div id="coinInfo" class="content-section hidden">
+          <h1 class="section-title">Informasi Coin</h1>
+          <div class="coin-info">
+            <h3>Sisa Coin Anda: <span class="coin-count" id="coinInfoRemaining">0</span></h3>
+            <p>1 Coin dapat digunakan untuk menambahkan 1 user baru</p>
+            <p>Anda dapat menambahkan maksimal 3 user per hari</p>
+            <p>Masa aktif user maksimal 1 bulan</p>
+          </div>
+        </div>
+        
+        <!-- Group Chat Section -->
+        <div id="groupChat" class="content-section hidden">
+          <h1 class="section-title">Percakapan Grup</h1>
+          <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+              {/* Pesan akan ditampilkan di sini */}
+            </div>
+            
+            <div class="chat-input-container">
+              <textarea class="chat-input" id="chatInput" placeholder="Ketik pesan Anda di sini..." rows="1"></textarea>
+              <button class="chat-send-btn" id="chatSendBtn">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // URL Firebase
+    const dbUrl = "https://wa-license-default-rtdb.asia-southeast1.firebasedatabase.app/";
+    
+    // Variabel global
+    let currentReseller = null;
+    let today = new Date().toISOString().split('T')[0];
+    let dailyUsage = 0;
+
+    // Fungsi login
+    document.getElementById("loginFormElement").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const deviceId = document.getElementById("deviceId").value.trim();
+      
+      if (!deviceId) {
+        alert("ID Device tidak boleh kosong");
+        return;
+      }
+      
+      // Simpan ID device di localStorage
+      localStorage.setItem('resellerDeviceId', deviceId);
+      
+      // Cek di database reseller
+      try {
+        const res = await fetch(dbUrl + "resellers.json");
+        const resellers = await res.json();
+        
+        if (resellers && Array.isArray(resellers)) {
+          const foundReseller = resellers.find(reseller => reseller.id === deviceId);
+          
+          if (foundReseller) {
+            currentReseller = foundReseller;
+            
+            // Sembunyikan form login, tampilkan panel
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("resellerPanel").style.display = "flex";
+            
+            // Tampilkan ID reseller di sidebar
+            document.getElementById("displayResellerId").textContent = deviceId;
+            
+            // Update dashboard
+            updateDashboard();
+            
+            // Cek penggunaan hari ini
+            checkDailyUsage();
+            
+          } else {
+            alert("ID Device tidak terdaftar sebagai reseller");
+          }
+        } else {
+          alert("Tidak dapat memuat data reseller");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Terjadi kesalahan saat login");
+      }
+    });
+
+    // Cek jika sudah login sebelumnya
+    window.addEventListener('load', function() {
+      const savedDeviceId = localStorage.getItem('resellerDeviceId');
+      if (savedDeviceId) {
+        document.getElementById('deviceId').value = savedDeviceId;
+        // Auto-submit the form
+        document.getElementById('loginFormElement').dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // Fungsi untuk menampilkan section
+    function showSection(sectionId) {
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      document.getElementById(sectionId).classList.remove('hidden');
+      
+      // Update menu aktif
+      document.querySelectorAll('.sidebar li').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+      
+      // Update info coin di berbagai section
+      if (currentReseller) {
+        document.getElementById('remainingCoin').textContent = currentReseller.coin || 0;
+        document.getElementById('addUserRemainingCoin').textContent = currentReseller.coin || 0;
+        document.getElementById('coinInfoRemaining').textContent = currentReseller.coin || 0;
+        
+        // Update info limit harian
+        if (sectionId === 'addUser') {
+          document.getElementById('dailyLimitInfo').textContent = 
+            `Anda telah menambahkan ${dailyUsage}/3 user hari ini`;
+        }
+        
+        // Jika menampilkan daftar user, muat ulang data
+        if (sectionId === 'userList') {
+          loadUserList();
+        }
+        
+        // Jika menampilkan chat, muat pesan
+        if (sectionId === 'groupChat') {
+          loadChatMessages();
+        }
+      }
+    }
+
+    // Update dashboard
+    async function updateDashboard() {
+      if (!currentReseller) return;
+      
+      try {
+        // Ambil data user
+        const usersRes = await fetch(dbUrl + "licenses.json");
+        const usersData = await usersRes.json();
+        
+        // Filter user yang dibuat oleh reseller ini
+        let userList = [];
+        if (Array.isArray(usersData)) {
+          userList = usersData.filter(user => user && user.resellerId === currentReseller.id);
+        }
+        
+        // Update statistik
+        document.getElementById('totalUsers').textContent = userList.length;
+        
+        // Hitung user aktif dan expired
+        if (userList.length > 0) {
+          const now = new Date();
+          const activeLicenses = userList.filter(user => {
+            const expiryDate = new Date(user.expiresAt);
+            return expiryDate > now;
+          }).length;
+          
+          document.getElementById('activeLicenses').textContent = activeLicenses;
+          document.getElementById('expiredLicenses').textContent = userList.length - activeLicenses;
+        } else {
+          document.getElementById('activeLicenses').textContent = '0';
+          document.getElementById('expiredLicenses').textContent = '0';
+        }
+        
+        // Update info coin
+        document.getElementById('remainingCoin').textContent = currentReseller.coin || 0;
+        
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    // Cek penggunaan harian
+    async function checkDailyUsage() {
+      if (!currentReseller) return;
+      
+      try {
+        const usageRes = await fetch(dbUrl + "resellerUsage.json");
+        const usageData = await usageRes.json();
+        
+        if (usageData && usageData[currentReseller.id] && usageData[currentReseller.id][today]) {
+          dailyUsage = usageData[currentReseller.id][today];
+        } else {
+          dailyUsage = 0;
+        }
+      } catch (error) {
+        console.error("Error checking daily usage:", error);
+        dailyUsage = 0;
+      }
+    }
+
+    // Tambah user baru
+    async function addUser(user) {
+      if (!currentReseller) return;
+      
+      // Validasi coin
+      if (currentReseller.coin < 1) {
+        alert("Coin Anda tidak cukup!");
+        return;
+      }
+      
+      // Validasi limit harian
+      if (dailyUsage >= 3) {
+        alert("Anda sudah mencapai batas penambahan user hari ini (maks 3 user/hari)");
+        return;
+      }
+      
+      // Validasi tanggal (maks 1 bulan)
+      const today = new Date();
+      const oneMonthLater = new Date();
+      oneMonthLater.setMonth(today.getMonth() + 1);
+      
+      const selectedDate = new Date(user.expiresAt);
+      if (selectedDate > oneMonthLater) {
+        alert("Masa aktif tidak boleh lebih dari 1 bulan");
+        return;
+      }
+      
+      try {
+        // Ambil data user
+        const res = await fetch(dbUrl + "licenses.json");
+        let users = await res.json();
+        if (!Array.isArray(users)) users = [];
+        
+        // Tambahkan resellerId ke data user
+        user.resellerId = currentReseller.id;
+        users.push(user);
+        
+        // Simpan ke database
+        await fetch(dbUrl + "licenses.json", {
+          method: "PUT",
+          body: JSON.stringify(users),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        // Kurangi coin reseller
+        const resellerRes = await fetch(dbUrl + "resellers.json");
+        let resellers = await resellerRes.json();
+        
+        if (Array.isArray(resellers)) {
+          const resellerIndex = resellers.findIndex(r => r.id === currentReseller.id);
+          if (resellerIndex !== -1) {
+            resellers[resellerIndex].coin -= 1;
+            if (!resellers[resellerIndex].userCount) {
+              resellers[resellerIndex].userCount = 0;
+            }
+            resellers[resellerIndex].userCount += 1;
+            
+            await fetch(dbUrl + "resellers.json", {
+              method: "PUT",
+              body: JSON.stringify(resellers),
+              headers: {"Content-Type": "application/json"}
+            });
+            
+            // Update data reseller saat ini
+            currentReseller = resellers[resellerIndex];
+          }
+        }
+        
+        // Update penggunaan harian
+        const usageRes = await fetch(dbUrl + "resellerUsage.json");
+        let usageData = await usageRes.json();
+        if (!usageData) usageData = {};
+        if (!usageData[currentReseller.id]) usageData[currentReseller.id] = {};
+        
+        if (usageData[currentReseller.id][today]) {
+          usageData[currentReseller.id][today] += 1;
+        } else {
+          usageData[currentReseller.id][today] = 1;
+        }
+        
+        await fetch(dbUrl + "resellerUsage.json", {
+          method: "PUT",
+          body: JSON.stringify(usageData),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        dailyUsage = usageData[currentReseller.id][today];
+        
+        // Update UI
+        alert("User berhasil ditambahkan!");
+        document.getElementById("addUserForm").reset();
+        updateDashboard();
+        loadUserList(); // Muat ulang daftar user
+        showSection('userList'); // Tampilkan halaman daftar user
+        
+      } catch (error) {
+        console.error("Error adding user:", error);
+        alert("Terjadi kesalahan saat menambahkan user");
+      }
+    }
+
+    // Form tambah user
+    document.getElementById("addUserForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const user = {
+        id: document.getElementById("id").value,
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+        expiresAt: document.getElementById("expiresAt").value,
+        allowOffline: document.getElementById("allowOffline").value === "true"
+      };
+      addUser(user);
+    });
+
+    // Fungsi untuk memuat daftar user
+    async function loadUserList() {
+      if (!currentReseller) return;
+      
+      try {
+        const usersRes = await fetch(dbUrl + "licenses.json");
+        const usersData = await usersRes.json();
+        
+        const tableBody = document.getElementById('usersTableBody');
+        tableBody.innerHTML = '';
+        
+        const now = new Date();
+        
+        if (Array.isArray(usersData)) {
+          usersData.forEach((user, index) => {
+            if (user && user.resellerId === currentReseller.id) {
+              const expiryDate = new Date(user.expiresAt);
+              const isExpired = expiryDate < now;
+              
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${user.id || '-'}</td>
+                <td>${user.username || '-'}</td>
+                <td>${user.password || '-'}</td>
+                <td>${user.expiresAt || '-'}</td>
+                <td class="${isExpired ? 'status-expired' : 'status-active'}">
+                  ${isExpired ? 'EXPIRED' : 'AKTIF'}
+                </td>
+                <td class="action-btns">
+                  <button class="delete-btn" onclick="deleteUser(${index})">
+                    <i class="fas fa-trash"></i> Hapus
+                  </button>
+                </td>
+              `;
+              
+              tableBody.appendChild(row);
+            }
+          });
+        }
+        
+        if (tableBody.children.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Belum ada user</td></tr>';
+        }
+        
+      } catch (error) {
+        console.error("Error loading user list:", error);
+        alert("Gagal memuat daftar user");
+      }
+    }
+    
+    // Fungsi untuk menghapus user
+    async function deleteUser(userIndex) {
+      if (!confirm("Apakah Anda yakin ingin menghapus user ini?")) return;
+      
+      try {
+        const res = await fetch(dbUrl + "licenses.json");
+        let users = await res.json();
+        
+        if (Array.isArray(users)) {
+          // Hapus user dari array
+          users.splice(userIndex, 1);
+          
+          // Simpan ke database
+          await fetch(dbUrl + "licenses.json", {
+            method: "PUT",
+            body: JSON.stringify(users),
+            headers: {"Content-Type": "application/json"}
+          });
+          
+          alert("User berhasil dihapus");
+          loadUserList(); // Muat ulang daftar user
+          updateDashboard(); // Update statistik dashboard
+        }
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        alert("Gagal menghapus user");
+      }
+    }
+    
+    // Fungsi untuk chat group
+    async function loadChatMessages() {
+      try {
+        const res = await fetch(dbUrl + "group_chat.json");
+        const messages = await res.json();
+        const chatContainer = document.getElementById('chatMessages');
+        chatContainer.innerHTML = '';
+        
+        if (Array.isArray(messages)) {
+          // Urutkan pesan berdasarkan waktu
+          messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          
+          messages.forEach((msg, index) => {
+            const messageDiv = document.createElement('div');
+            
+            // Tentukan class berdasarkan jenis pengirim
+            const messageClass = msg.senderType === 'owner' ? 'message-owner' : 'message-reseller';
+            
+            // Tambahkan class 'deleted' jika pesan telah dihapus
+            if (msg.deleted) {
+              messageDiv.className = `message ${messageClass} deleted`;
+            } else {
+              messageDiv.className = `message ${messageClass}`;
+            }
+            
+            // Tampilkan informasi pesan
+            messageDiv.innerHTML = `
+              <div class="message-sender">${msg.senderName}</div>
+              <div class="message-text">${msg.text || ''}</div>
+              <div class="message-time">${new Date(msg.timestamp).toLocaleString()}</div>
+            `;
+            
+            // Tambahkan tombol hapus jika pesan milik reseller ini dan belum dihapus
+            if (!msg.deleted && msg.senderName === (currentReseller.name || currentReseller.id)) {
+              const deleteBtn = document.createElement('button');
+              deleteBtn.className = 'delete-message-btn';
+              deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+              deleteBtn.onclick = () => deleteChatMessage(index);
+              messageDiv.appendChild(deleteBtn);
+            }
+            
+            chatContainer.appendChild(messageDiv);
+          });
+          
+          // Scroll ke bawah
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+      } catch (error) {
+        console.error("Error loading chat messages:", error);
+      }
+    }
+    
+    async function sendChatMessage() {
+      const messageInput = document.getElementById('chatInput');
+      const messageText = messageInput.value.trim();
+      
+      if (!messageText) return;
+      
+      try {
+        const res = await fetch(dbUrl + "group_chat.json");
+        let messages = await res.json();
+        if (!Array.isArray(messages)) messages = [];
+        
+        // Tambahkan pesan baru
+        messages.push({
+          text: messageText,
+          senderType: 'reseller',
+          senderName: currentReseller.name || currentReseller.id,
+          timestamp: new Date().toISOString(),
+          deleted: false
+        });
+        
+        // Simpan ke Firebase
+        await fetch(dbUrl + "group_chat.json", {
+          method: "PUT",
+          body: JSON.stringify(messages),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        // Kosongkan input
+        messageInput.value = '';
+        
+        // Muat ulang pesan
+        loadChatMessages();
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    }
+    
+    // Fungsi untuk menghapus pesan chat
+    async function deleteChatMessage(messageIndex) {
+      if (!confirm("Apakah Anda yakin ingin menghapus pesan ini?")) return;
+      
+      try {
+        const res = await fetch(dbUrl + "group_chat.json");
+        let messages = await res.json();
+        
+        if (Array.isArray(messages) && messages[messageIndex]) {
+          // Tandai pesan sebagai dihapus (soft delete)
+          messages[messageIndex].deleted = true;
+          
+          // Simpan ke database
+          await fetch(dbUrl + "group_chat.json", {
+            method: "PUT",
+            body: JSON.stringify(messages),
+            headers: {"Content-Type": "application/json"}
+          });
+          
+          // Muat ulang pesan
+          loadChatMessages();
+        }
+      } catch (error) {
+        console.error("Error deleting message:", error);
+        alert("Gagal menghapus pesan");
+      }
+    }
+
+    // Inisialisasi halaman
+    document.addEventListener("DOMContentLoaded", function() {
+      // Set tanggal maksimum (1 bulan dari sekarang)
+      const today = new Date();
+      const oneMonthLater = new Date();
+      oneMonthLater.setMonth(today.getMonth() + 1);
+      
+      const maxDate = oneMonthLater.toISOString().split('T')[0];
+      document.getElementById("expiresAt").max = maxDate;
+      
+      // Set tanggal default (7 hari dari sekarang)
+      const defaultDate = new Date();
+      defaultDate.setDate(today.getDate() + 7);
+      document.getElementById("expiresAt").valueAsDate = defaultDate;
+      
+      // Event listener untuk chat
+      document.getElementById("chatSendBtn").addEventListener("click", sendChatMessage);
+      document.getElementById("chatInput").addEventListener("keypress", function(e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendChatMessage();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
