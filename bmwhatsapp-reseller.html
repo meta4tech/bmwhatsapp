@@ -18,6 +18,7 @@
       padding: 30px;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: relative;
     }
     .login-container h1 {
       text-align: center;
@@ -299,6 +300,58 @@
       content: " (Pesan telah dihapus)";
       font-style: italic;
     }
+    /* Styling untuk info pembelian akun */
+    .buy-info {
+      background: #f8f9fa;
+      border-left: 4px solid #007bff;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .social-media {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .social-icon {
+      font-size: 24px;
+      color: #007bff;
+      transition: color 0.3s;
+    }
+    .social-icon:hover {
+      color: #0056b3;
+    }
+    /* Styling untuk foto profil */
+    .profile-picture {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin: 0 auto 15px;
+      display: block;
+      cursor: pointer;
+    }
+    .profile-upload {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .profile-upload-btn {
+      background: #34495e;
+      padding: 8px 15px;
+      font-size: 14px;
+      width: auto;
+      display: inline-block;
+    }
+    .profile-upload-btn:hover {
+      background: #2c3e50;
+    }
+    #profileUpload {
+      display: none;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
@@ -313,6 +366,21 @@
       </div>
       <button type="submit">Masuk</button>
     </form>
+    
+    <div class="buy-info">
+      <p><strong>Belum punya akun reseller?</strong> Hubungi admin melalui sosial media berikut untuk membeli akun reseller:</p>
+      <div class="social-media">
+        <a href="https://wa.me/628123456789" target="_blank" class="social-icon">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+        <a href="https://t.me/username_admin" target="_blank" class="social-icon">
+          <i class="fab fa-telegram"></i>
+        </a>
+        <a href="https://instagram.com/username_admin" target="_blank" class="social-icon">
+          <i class="fab fa-instagram"></i>
+        </a>
+      </div>
+    </div>
   </div>
 
   <!-- Reseller Panel -->
@@ -320,6 +388,13 @@
     <div class="container">
       <div class="sidebar">
           <h2>Panel Reseller</h2>
+          <div class="profile-upload">
+            <img id="profilePicture" src="https://via.placeholder.com/80" class="profile-picture" alt="Foto Profil">
+            <input type="file" id="profileUpload" accept="image/*">
+            <button class="profile-upload-btn" onclick="document.getElementById('profileUpload').click()">
+              <i class="fas fa-camera"></i> Ganti Foto
+            </button>
+          </div>
           <div class="reseller-id-display">
             <i class="fas fa-user"></i> <span id="displayResellerId"></span>
           </div>
@@ -338,6 +413,9 @@
             </li>
             <li onclick="showSection('groupChat')">
               <i class="fas fa-comments"></i> Percakapan Grup
+            </li>
+            <li onclick="showSection('profileSettings')">
+              <i class="fas fa-cog"></i> Pengaturan Profil
             </li>
           </ul>
       </div>
@@ -452,6 +530,37 @@
             </div>
           </div>
         </div>
+        
+        <!-- Profile Settings Section -->
+        <div id="profileSettings" class="content-section hidden">
+          <h1 class="section-title">Pengaturan Profil</h1>
+          <div class="form-container">
+            <div class="profile-upload" style="margin-bottom: 30px;">
+              <img id="profilePictureSettings" src="https://via.placeholder.com/120" class="profile-picture" style="width: 120px; height: 120px;" alt="Foto Profil">
+              <input type="file" id="profileUploadSettings" accept="image/*">
+              <button class="profile-upload-btn" onclick="document.getElementById('profileUploadSettings').click()">
+                <i class="fas fa-camera"></i> Pilih Foto Profil
+              </button>
+              <p class="usage-info">Ukuran maksimal: 2MB. Format: JPG, PNG</p>
+            </div>
+            
+            <form id="profileForm">
+              <div class="form-group">
+                <label for="resellerName">Nama Reseller</label>
+                <input type="text" id="resellerName" placeholder="Masukkan nama Anda">
+              </div>
+              <div class="form-group">
+                <label for="resellerEmail">Email</label>
+                <input type="email" id="resellerEmail" placeholder="Masukkan email Anda">
+              </div>
+              <div class="form-group">
+                <label for="resellerPhone">Nomor Telepon</label>
+                <input type="tel" id="resellerPhone" placeholder="Masukkan nomor telepon">
+              </div>
+              <button type="submit">Simpan Perubahan</button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -496,6 +605,9 @@
             // Tampilkan ID reseller di sidebar
             document.getElementById("displayResellerId").textContent = deviceId;
             
+            // Muat foto profil jika ada
+            loadProfilePicture();
+            
             // Update dashboard
             updateDashboard();
             
@@ -503,7 +615,7 @@
             checkDailyUsage();
             
           } else {
-            alert("ID Device tidak terdaftar sebagai reseller");
+            alert("ID Device tidak terdaftar sebagai reseller. Silakan hubungi admin untuk membeli akun.");
           }
         } else {
           alert("Tidak dapat memuat data reseller");
@@ -557,6 +669,11 @@
         // Jika menampilkan chat, muat pesan
         if (sectionId === 'groupChat') {
           loadChatMessages();
+        }
+        
+        // Jika menampilkan pengaturan profil, muat data
+        if (sectionId === 'profileSettings') {
+          loadProfileData();
         }
       }
     }
@@ -930,6 +1047,127 @@
         alert("Gagal menghapus pesan");
       }
     }
+
+    // Fungsi untuk memuat foto profil
+    function loadProfilePicture() {
+      if (!currentReseller) return;
+      
+      // Cek apakah ada foto profil di localStorage
+      const savedProfilePic = localStorage.getItem(`profilePic_${currentReseller.id}`);
+      if (savedProfilePic) {
+        document.getElementById('profilePicture').src = savedProfilePic;
+        document.getElementById('profilePictureSettings').src = savedProfilePic;
+      }
+      
+      // Cek apakah ada data profil di Firebase
+      loadProfileData();
+    }
+    
+    // Fungsi untuk memuat data profil
+    async function loadProfileData() {
+      if (!currentReseller) return;
+      
+      try {
+        const res = await fetch(`${dbUrl}resellers.json`);
+        const resellers = await res.json();
+        
+        if (Array.isArray(resellers)) {
+          const reseller = resellers.find(r => r.id === currentReseller.id);
+          if (reseller) {
+            // Isi form dengan data yang ada
+            if (reseller.name) {
+              document.getElementById('resellerName').value = reseller.name;
+            }
+            if (reseller.email) {
+              document.getElementById('resellerEmail').value = reseller.email;
+            }
+            if (reseller.phone) {
+              document.getElementById('resellerPhone').value = reseller.phone;
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error loading profile data:", error);
+      }
+    }
+    
+    // Fungsi untuk mengupload foto profil
+    document.getElementById('profileUpload').addEventListener('change', handleProfileUpload);
+    document.getElementById('profileUploadSettings').addEventListener('change', handleProfileUpload);
+    
+    function handleProfileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Validasi ukuran file (maks 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Ukuran file terlalu besar. Maksimal 2MB.');
+        return;
+      }
+      
+      // Validasi tipe file
+      if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+        alert('Format file tidak didukung. Gunakan JPG atau PNG.');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageData = e.target.result;
+        
+        // Simpan di localStorage
+        localStorage.setItem(`profilePic_${currentReseller.id}`, imageData);
+        
+        // Update gambar profil
+        document.getElementById('profilePicture').src = imageData;
+        document.getElementById('profilePictureSettings').src = imageData;
+        
+        alert('Foto profil berhasil diubah!');
+      };
+      
+      reader.readAsDataURL(file);
+    }
+    
+    // Fungsi untuk menyimpan data profil
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      if (!currentReseller) return;
+      
+      const name = document.getElementById('resellerName').value;
+      const email = document.getElementById('resellerEmail').value;
+      const phone = document.getElementById('resellerPhone').value;
+      
+      try {
+        const res = await fetch(`${dbUrl}resellers.json`);
+        let resellers = await res.json();
+        
+        if (Array.isArray(resellers)) {
+          const resellerIndex = resellers.findIndex(r => r.id === currentReseller.id);
+          if (resellerIndex !== -1) {
+            // Update data reseller
+            resellers[resellerIndex].name = name;
+            resellers[resellerIndex].email = email;
+            resellers[resellerIndex].phone = phone;
+            
+            // Simpan ke Firebase
+            await fetch(`${dbUrl}resellers.json`, {
+              method: "PUT",
+              body: JSON.stringify(resellers),
+              headers: {"Content-Type": "application/json"}
+            });
+            
+            // Update data reseller saat ini
+            currentReseller = resellers[resellerIndex];
+            
+            alert('Profil berhasil diperbarui!');
+          }
+        }
+      } catch (error) {
+        console.error("Error saving profile:", error);
+        alert('Terjadi kesalahan saat menyimpan profil.');
+      }
+    });
 
     // Inisialisasi halaman
     document.addEventListener("DOMContentLoaded", function() {
