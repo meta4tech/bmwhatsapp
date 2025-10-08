@@ -357,6 +357,11 @@
       color: white;
     }
     
+    .badge-vip {
+      background: #ffc107;
+      color: #212529;
+    }
+    
     .status-cell {
       text-align: center;
     }
@@ -602,6 +607,12 @@
           <li onclick="showSection('userActivity')">
             <i class="fas fa-history"></i> Aktivitas User
           </li>
+          <li onclick="showSection('vipManagement')">
+            <i class="fas fa-crown"></i> Kelola User VIP
+          </li>
+          <li onclick="showSection('addVipUser')">
+            <i class="fas fa-user-plus"></i> Tambah User VIP
+          </li>
           <li onclick="showSection('sendUpdate')">
             <i class="fas fa-bell"></i> Kirim Update
           </li>
@@ -638,6 +649,10 @@
           <div class="stat-card" style="border-left: 4px solid #f39c12;">
             <h3>Total Reseller</h3>
             <p id="totalResellers">Loading...</p>
+          </div>
+          <div class="stat-card" style="border-left: 4px solid #9b59b6;">
+            <h3>User VIP</h3>
+            <p id="totalVipUsers">Loading...</p>
           </div>
         </div>
       </div>
@@ -781,6 +796,61 @@
         </table>
       </div>
       
+      <!-- VIP Management Section -->
+      <div id="vipManagement" class="content-section hidden">
+        <h1 class="section-title">Kelola User VIP</h1>
+        <div class="filter-container">
+          <input type="text" id="vipSearchInput" placeholder="Cari user VIP..." style="padding: 10px; flex-grow: 1;">
+          <select id="vipStatusFilter" style="padding: 10px;">
+            <option value="">Semua Status</option>
+            <option value="active">Aktif</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+        <table id="vipTable">
+          <thead>
+            <tr>
+              <th>Device ID</th>
+              <th>Nama</th>
+              <th>Expiry Time</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <!-- Add VIP User Section -->
+      <div id="addVipUser" class="content-section hidden">
+        <h1 class="section-title">Tambah User VIP</h1>
+        <div class="form-container">
+          <form id="addVipUserForm">
+            <div class="form-group">
+              <label for="vipDeviceId">Device ID</label>
+              <input type="text" id="vipDeviceId" placeholder="Masukkan device ID" required>
+            </div>
+            <div class="form-group">
+              <label for="vipName">Nama User VIP</label>
+              <input type="text" id="vipName" placeholder="Masukkan nama user VIP" required>
+            </div>
+            <div class="form-group">
+              <label for="vipExpiryTime">Tanggal Expired</label>
+              <input type="date" id="vipExpiryTime" required>
+            </div>
+            <div class="form-group">
+              <label for="vipStatus">Status</label>
+              <select id="vipStatus">
+                <option value="active">Aktif</option>
+                <option value="inactive">Nonaktif</option>
+              </select>
+            </div>
+            <button type="submit">Tambah User VIP</button>
+          </form>
+        </div>
+      </div>
+      
       <!-- Send Update Section -->
       <div id="sendUpdate" class="content-section hidden">
         <h1 class="section-title">Kirim Update Aplikasi</h1>
@@ -892,6 +962,10 @@
               <label for="chatPath">Path untuk Chat</label>
               <input type="text" id="chatPath" placeholder="group_chat" required>
             </div>
+            <div class="form-group">
+              <label for="vipPath">Path untuk User VIP</label>
+              <input type="text" id="vipPath" placeholder="allowed_devices" required>
+            </div>
             <button type="submit">Simpan Pengaturan</button>
           </form>
         </div>
@@ -948,14 +1022,14 @@
   <script>
     // Firebase configuration - Ganti dengan konfigurasi project Anda
     const firebaseConfig = {
-  apiKey: "AIzaSyAPhmV0dV4kGVzh-F1kwE60L_kJYkHWmsg",
-  authDomain: "wa-license.firebaseapp.com",
-  databaseURL: "https://wa-license-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "wa-license",
-  storageBucket: "wa-license.firebasestorage.app",
-  messagingSenderId: "1035422404789",
-  appId: "1:1035422404789:web:3051b5229be239eaab2efc"
-};
+      apiKey: "AIzaSyAPhmV0dV4kGVzh-F1kwE60L_kJYkHWmsg",
+      authDomain: "wa-license.firebaseapp.com",
+      databaseURL: "https://wa-license-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wa-license",
+      storageBucket: "wa-license.firebasestorage.app",
+      messagingSenderId: "1035422404789",
+      appId: "1:1035422404789:web:3051b5229be239eaab2efc"
+    };
     
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
@@ -968,7 +1042,8 @@
         resellers: "resellers",
         activities: "activities",
         update: "app_update",
-        chat: "group_chat"
+        chat: "group_chat",
+        vip: "allowed_devices"
       }
     };
     
@@ -1080,6 +1155,7 @@
       document.getElementById('activitiesPath').value = databaseConfig.paths.activities;
       document.getElementById('updatePath').value = databaseConfig.paths.update;
       document.getElementById('chatPath').value = databaseConfig.paths.chat;
+      document.getElementById('vipPath').value = databaseConfig.paths.vip;
       
       document.getElementById('resellerApiKey').value = resellerConfig.apiKey;
       document.getElementById('resellerFirebaseUrl').value = resellerConfig.defaultFirebaseUrl;
@@ -1172,6 +1248,11 @@
       } else if (sectionId === 'groupChat') {
         loadChatMessages();
         populateChatResellerFilter();
+      } else if (sectionId === 'vipManagement') {
+        fetchVipUsers();
+      } else if (sectionId === 'addVipUser') {
+        // Reset form
+        document.getElementById('addVipUserForm').reset();
       }
     }
 
@@ -1205,6 +1286,13 @@
         const resellersData = await resellersRes.json();
         const totalResellers = Array.isArray(resellersData) ? resellersData.length : 0;
         document.getElementById('totalResellers').textContent = totalResellers;
+        
+        // Ambil data user VIP
+        const vipUsersRes = await fetch(getFirebasePath('vip'));
+        const vipUsersData = await vipUsersRes.json();
+        const totalVipUsers = vipUsersData && vipUsersData.allowed_devices ? 
+          Object.keys(vipUsersData.allowed_devices).length : 0;
+        document.getElementById('totalVipUsers').textContent = totalVipUsers;
         
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -1267,6 +1355,170 @@
         }
       } catch (error) {
         console.error("Error fetching users:", error);
+      }
+    }
+
+    // Ambil data user VIP
+    async function fetchVipUsers() {
+      try {
+        const res = await fetch(getFirebasePath('vip'));
+        const vipData = await res.json();
+        const tbody = document.querySelector("#vipTable tbody");
+        tbody.innerHTML = "";
+        
+        if (vipData && vipData.allowed_devices) {
+          const now = Date.now();
+          
+          Object.entries(vipData.allowed_devices).forEach(([deviceId, userData]) => {
+            const expiryTime = userData.expiry_time;
+            const isExpired = expiryTime < now;
+            
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${deviceId}</td>
+              <td>${userData.name}</td>
+              <td>${new Date(expiryTime).toLocaleDateString()}</td>
+              <td class="status-cell">
+                <span class="badge ${isExpired ? 'badge-expired' : 'badge-vip'}">
+                  ${isExpired ? 'Expired' : 'VIP'}
+                </span>
+              </td>
+              <td>${new Date(userData.created_at).toLocaleDateString()}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="edit-btn" onclick="editVipUser('${deviceId}')">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  <button class="delete-btn" onclick="deleteVipUser('${deviceId}')">
+                    <i class="fas fa-trash-alt"></i> Hapus
+                  </button>
+                </div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching VIP users:", error);
+      }
+    }
+
+    // Tambah user VIP
+    async function addVipUser(vipUser) {
+      try {
+        const res = await fetch(getFirebasePath('vip'));
+        let vipData = await res.json();
+        
+        if (!vipData) {
+          vipData = { allowed_devices: {} };
+        } else if (!vipData.allowed_devices) {
+          vipData.allowed_devices = {};
+        }
+        
+        // Tambahkan user VIP baru
+        vipData.allowed_devices[vipUser.deviceId] = {
+          name: vipUser.name,
+          expiry_time: vipUser.expiry_time,
+          status: vipUser.status,
+          created_at: vipUser.created_at
+        };
+        
+        await fetch(getFirebasePath('vip'), {
+          method: "PUT",
+          body: JSON.stringify(vipData),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        // Catat aktivitas penambahan user VIP
+        await logActivity({
+          type: 'vip_created',
+          deviceId: vipUser.deviceId,
+          name: vipUser.name
+        });
+        
+        fetchVipUsers();
+        showSection('vipManagement');
+        updateDashboardStats();
+      } catch (error) {
+        console.error("Error adding VIP user:", error);
+      }
+    }
+
+    // Edit user VIP
+    async function editVipUser(deviceId) {
+      try {
+        const res = await fetch(getFirebasePath('vip'));
+        let vipData = await res.json();
+        
+        if (!vipData || !vipData.allowed_devices || !vipData.allowed_devices[deviceId]) {
+          alert("User VIP tidak ditemukan!");
+          return;
+        }
+        
+        const vipUser = vipData.allowed_devices[deviceId];
+        
+        // Tampilkan form edit
+        const newName = prompt("Edit Nama User VIP:", vipUser.name);
+        if (newName === null) return;
+        
+        const newExpiryTime = prompt("Edit Tanggal Expired (YYYY-MM-DD):", 
+          new Date(vipUser.expiry_time).toISOString().split('T')[0]);
+        if (newExpiryTime === null) return;
+        
+        const newStatus = prompt("Edit Status (active/inactive):", vipUser.status);
+        if (newStatus === null) return;
+        
+        vipData.allowed_devices[deviceId] = {
+          ...vipUser,
+          name: newName,
+          expiry_time: new Date(newExpiryTime).getTime(),
+          status: newStatus
+        };
+        
+        await fetch(getFirebasePath('vip'), {
+          method: "PUT",
+          body: JSON.stringify(vipData),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        fetchVipUsers();
+      } catch (error) {
+        console.error("Error editing VIP user:", error);
+      }
+    }
+
+    // Hapus user VIP
+    async function deleteVipUser(deviceId) {
+      if (!confirm("Apakah Anda yakin ingin menghapus user VIP ini?")) return;
+      
+      try {
+        const res = await fetch(getFirebasePath('vip'));
+        let vipData = await res.json();
+        
+        if (!vipData || !vipData.allowed_devices || !vipData.allowed_devices[deviceId]) {
+          return;
+        }
+        
+        // Catat aktivitas penghapusan
+        const deletedUser = vipData.allowed_devices[deviceId];
+        await logActivity({
+          type: 'vip_deleted',
+          deviceId: deviceId,
+          name: deletedUser.name
+        });
+        
+        delete vipData.allowed_devices[deviceId];
+        
+        await fetch(getFirebasePath('vip'), {
+          method: "PUT",
+          body: JSON.stringify(vipData),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        fetchVipUsers();
+        updateDashboardStats();
+      } catch (error) {
+        console.error("Error deleting VIP user:", error);
       }
     }
 
@@ -1662,6 +1914,10 @@
               activityText = `Menghapus reseller ${activity.resellerName}`;
             } else if (activity.type === 'update_sent') {
               activityText = `Mengirim update aplikasi versi ${activity.version}`;
+            } else if (activity.type === 'vip_created') {
+              activityText = `Menambahkan user VIP ${activity.name}`;
+            } else if (activity.type === 'vip_deleted') {
+              activityText = `Menghapus user VIP ${activity.name}`;
             }
             
             // Cari nama reseller
@@ -1678,8 +1934,8 @@
               <td>${new Date(activity.timestamp).toLocaleString()}</td>
               <td>${resellerName}</td>
               <td>${activityText}</td>
-              <td>${activity.userId || '-'}</td>
-              <td>${activity.username || '-'}</td>
+              <td>${activity.userId || activity.deviceId || '-'}</td>
+              <td>${activity.username || activity.name || '-'}</td>
             `;
             tbody.appendChild(tr);
           });
@@ -1969,6 +2225,10 @@
                 activityText = `Menghapus reseller ${activity.resellerName}`;
               } else if (activity.type === 'update_sent') {
                 activityText = `Mengirim update aplikasi versi ${activity.version} ke ${activity.app}`;
+              } else if (activity.type === 'vip_created') {
+                activityText = `Menambahkan user VIP ${activity.name}`;
+              } else if (activity.type === 'vip_deleted') {
+                activityText = `Menghapus user VIP ${activity.name}`;
               }
               
               // Cari nama reseller
@@ -1984,8 +2244,8 @@
                 <td>${new Date(activity.timestamp).toLocaleString()}</td>
                 <td>${resellerName}</td>
                 <td>${activityText}</td>
-                <td>${activity.userId || '-'}</td>
-                <td>${activity.username || '-'}</td>
+                <td>${activity.userId || activity.deviceId || '-'}</td>
+                <td>${activity.username || activity.name || '-'}</td>
               `;
               tbody.appendChild(tr);
             }
@@ -1993,6 +2253,74 @@
         }
       } catch (error) {
         console.error("Error filtering activities:", error);
+      }
+    }
+
+    // Filter user VIP
+    document.getElementById("vipSearchInput").addEventListener("input", function(e) {
+      filterVipUsers();
+    });
+    
+    document.getElementById("vipStatusFilter").addEventListener("change", function() {
+      filterVipUsers();
+    });
+    
+    async function filterVipUsers() {
+      const searchTerm = document.getElementById("vipSearchInput").value.toLowerCase();
+      const statusFilter = document.getElementById("vipStatusFilter").value;
+      
+      try {
+        const res = await fetch(getFirebasePath('vip'));
+        const vipData = await res.json();
+        const tbody = document.querySelector("#vipTable tbody");
+        tbody.innerHTML = "";
+        
+        if (vipData && vipData.allowed_devices) {
+          const now = Date.now();
+          
+          Object.entries(vipData.allowed_devices).forEach(([deviceId, userData]) => {
+            const expiryTime = userData.expiry_time;
+            const isExpired = expiryTime < now;
+            
+            // Filter berdasarkan kriteria
+            const matchesSearch = 
+              deviceId.toLowerCase().includes(searchTerm) || 
+              userData.name.toLowerCase().includes(searchTerm);
+            
+            const matchesStatus = 
+              !statusFilter || 
+              (statusFilter === 'active' && !isExpired) || 
+              (statusFilter === 'expired' && isExpired);
+            
+            if (matchesSearch && matchesStatus) {
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${deviceId}</td>
+                <td>${userData.name}</td>
+                <td>${new Date(expiryTime).toLocaleDateString()}</td>
+                <td class="status-cell">
+                  <span class="badge ${isExpired ? 'badge-expired' : 'badge-vip'}">
+                    ${isExpired ? 'Expired' : 'VIP'}
+                  </span>
+                </td>
+                <td>${new Date(userData.created_at).toLocaleDateString()}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="edit-btn" onclick="editVipUser('${deviceId}')">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="delete-btn" onclick="deleteVipUser('${deviceId}')">
+                      <i class="fas fa-trash-alt"></i> Hapus
+                    </button>
+                  </div>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error filtering VIP users:", error);
       }
     }
 
@@ -2021,6 +2349,20 @@
         userCount: 0
       };
       addReseller(reseller);
+      e.target.reset();
+    });
+    
+    // Form tambah user VIP
+    document.getElementById("addVipUserForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const vipUser = {
+        deviceId: document.getElementById("vipDeviceId").value,
+        name: document.getElementById("vipName").value,
+        expiry_time: new Date(document.getElementById("vipExpiryTime").value).getTime(),
+        status: document.getElementById("vipStatus").value,
+        created_at: Date.now()
+      };
+      addVipUser(vipUser);
       e.target.reset();
     });
     
@@ -2071,7 +2413,8 @@
           resellers: document.getElementById("resellersPath").value,
           activities: document.getElementById("activitiesPath").value,
           update: document.getElementById("updatePath").value,
-          chat: document.getElementById("chatPath").value
+          chat: document.getElementById("chatPath").value,
+          vip: document.getElementById("vipPath").value
         }
       };
       
