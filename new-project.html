@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZENTARA LEGENDS🐉</title>
+    <link rel="stylesheet" href="">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 60px;
+        }
+        /* New Header Style */
+        .main-header {
+            background: linear-gradient(90deg, #2d2d2d 0%, #3d3d3d 100%);
+            padding: 15px 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border-bottom: 3px solid #ffffff;
+        }
+        .header-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            letter-spacing: 1px;
+        }
+        .header-line {
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 0%, #ffffff 50%, transparent 100%);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+        /* Slide Container */
+        .slide {
+            flex: 1;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* About Card */
+        #about {
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+        .about-banner {
+            width: 90%;
+            max-width: 600px;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+            border: 3px solid #ffffff;
+        }
+        .about-content {
+            background: rgba(45, 45, 45, 0.9);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            border: 2px solid #ffffff;
+            line-height: 1.6;
+        }
+        .about-content div {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .about-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        .rules-section {
+            background: rgba(35, 35, 35, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+            border-left: 4px solid #ffffff;
+        }
+        .rules-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .rules-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .rules-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #555555;
+            display: flex;
+            align-items: center;
+        }
+        .rules-list li:last-child {
+            border-bottom: none;
+        }
+        .rules-list li:before {
+            content: "❌";
+            margin-right: 10px;
+            color: #ff6b6b;
+        }
+        /* Product Slide */
+        #product {
+            justify-content: flex-start;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            gap: 20px;
+        }
+        .product-list {
+            width: 90%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(45, 45, 45, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            font-size: 14px;
+            line-height: 1.6;
+            border: 2px solid #ffffff;
+        }
+        .product-list h2 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        .product-list h3 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #ffffff;
+            padding-bottom: 5px;
+            border-bottom: 2px dashed #ffffff;
+        }
+        .product-list ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .product-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #555555;
+            display: flex;
+            justify-content: space-between;
+        }
+        .product-list li:last-child {
+            border-bottom: none;
+        }
+        .product-list .price {
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .note-section {
+            background: rgba(35, 35, 35, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #ffffff;
+        }
+        .note-section p {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .note-section p:before {
+            content: "✔️";
+            margin-right: 10px;
+            color: #ffffff;
+        }
+        /* Support Table */
+        #support {
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+        .support-card {
+            background: rgba(45, 45, 45, 0.9);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            border: 2px solid #ffffff;
+        }
+        .support-card h2 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        .support-card .desc {
+            font-size: 16px;
+            color: #b0b0b0;
+            margin-bottom: 20px;
+        }
+        .support-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .support-table thead tr {
+            border-bottom: 2px solid #ffffff;
+        }
+        .support-table th,
+        .support-table td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+        .support-table th {
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .support-table td {
+            border-bottom: 1px solid #555555;
+        }
+        .support-table tr:last-child td {
+            border-bottom: none;
+        }
+        .support-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        /* Contact */
+        #contact {
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+        .contact-footer {
+            background: rgba(45, 45, 45, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            font-size: 16px;
+            color: #b0b0b0;
+            border: 2px solid #ffffff;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+        }
+        .contact-card {
+            background: rgba(45, 45, 45, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            border: 2px solid #ffffff;
+        }
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+            background: rgba(60, 60, 60, 0.9);
+        }
+        .contact-card i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        .contact-card span {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+        .site-footer {
+            color: #b0b0b0;
+            font-size: 14px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #555555;
+            width: 90%;
+            max-width: 500px;
+        }
+        /* Creator Section */
+        #creator {
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+        .creator-card {
+            background: rgba(45, 45, 45, 0.9);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px solid #ffffff;
+        }
+        .creator-card h2 {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffffff;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        .creator-card p {
+            font-size: 16px;
+            color: #b0b0b0;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .creator-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .creator-social {
+            background: rgba(45, 45, 45, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            border: 2px solid #ffffff;
+        }
+        .creator-social:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+            background: rgba(60, 60, 60, 0.9);
+        }
+        .creator-social i {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        .creator-social span {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+        /* Navbar Bottom */
+        .navbar {
+            background: rgba(45, 45, 45, 0.95);
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            backdrop-filter: blur(5px);
+            border-top: 2px solid #ffffff;
+        }
+        .nav-btn {
+            background: none;
+            border: none;
+            color: #b0b0b0;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .nav-btn i {
+            font-size: 22px;
+        }
+        .nav-btn.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        .nav-btn:hover:not(.active) {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(35, 35, 35, 0.5);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ffffff;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e0e0e0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<header class="main-header">
+    <div class="header-title">ZENTARA LEGENDS 🐉</div>
+    <div class="header-line"></div>
+</header>
+
+<div class="slide active" id="about">
+    <img src="https://files.catbox.moe/uj3l5g.jpg" alt="Banner" class="about-banner">
+    <div class="about-content">
+        <div class="about-title">✨ ZENTARA LEGENDS – Dunia Para Legenda ✨</div>
+        <div><strong>JAVA:</strong> IP: play.zentaralegends.xyz</div>
+        <div><strong>BEDROCK:</strong> IP: play.zentaralegends.xyz | Port: 19132</div>
+        <div><strong>SUPPORT JAVA AND BEDROCK</strong></div>
+        <div><strong>TEMA RPG × ECONOMY</strong></div>
+        <div>Selamat datang, para petualang! 🎉</div>
+        <div>Di sini kita semua adalah bagian dari sebuah kisah besar bernama Zentara Legends — tempat di mana setiap pemain bisa menjadi legenda, bukan hanya sekadar penonton.</div>
+        <div><strong>🌍 Apa itu Zentara Legends?</strong></div>
+        <div>Zentara Legends adalah komunitas yang menyatukan para pemain Minecraft dari berbagai tempat, membangun dunia fantasi penuh petualangan, pertempuran, dan cerita epik yang kita tulis bersama.</div>
+        
+        <div class="rules-section">
+            <div class="rules-title">ʀᴜʟᴇs ɪɴ sᴇʀᴠᴇʀ</div>
+            <ul class="rules-list">
+                <li>ᴛɪᴅᴀᴋ ʙᴏʟᴇʜ ᴍᴇᴍʙᴜʟʟʏ ᴍᴇᴍʙᴇʀ ʙᴀʀᴜ</li>
+                <li>ᴛɪᴅᴀᴋ ʙᴏʟᴇʜ ᴄʜᴇᴀᴛ ᴅᴀɴ ᴛᴇʀʙᴀɴɢ</li>
+                <li>ᴛɪᴅᴀᴋ ʙᴏʟᴇʜ ʀᴀsɪs / ᴍᴇᴍʙᴀᴡᴀ ɴᴀᴍᴀ ᴏʀᴀɴɢ ᴛᴜᴀ ᴅɪ sᴇʀᴠᴇʀ</li>
+                <li>ᴛɪᴅᴀᴋ ʙᴏʟᴇʜ ʙᴇʀʙɪᴄᴀʀᴀ ᴋᴀsᴀʀ sᴀᴍᴘᴇ ᴍᴇʟᴇᴡᴀᴛɪ ʙᴀᴛᴀs</li>
+                <li>ᴛɪᴅᴀᴋ ʙᴏʟᴇʜ ᴍᴇᴍʙᴀᴡᴀ ᴀɢᴀᴍᴀ</li>
+                <li>ᴛɪᴅᴀᴋ ʙᴏʟᴇʜ ʙᴜʟʟʏɪɴɢ</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="product">
+    <div class="product-list">
+        <h2>⚔️ ʟɪsᴛ sᴇɴᴊᴀᴛᴀ & ʀᴀɴᴋ ✨ 𝗭𝗲𝗻𝘁𝗮𝗿𝗮 𝗣𝟮𝗪 ✨🔥</h2>
+        
+        <h3>Senjata Premium</h3>
+        <ul>
+            <li>Armor Draknes <span class="price">43.2K</span></li>
+            <li>Armor Gladiator <span class="price">57.6K</span></li>
+            <li>Armor MVP <span class="price">61.6K</span></li>
+            <li>Armor MVP++ <span class="price">79.2K</span></li>
+            <li>Armor Master <span class="price">53.6K</span></li>
+            <li>Greed V1 <span class="price">21.6K</span></li>
+            <li>Greed V2 <span class="price">39.2K</span></li>
+            <li>Greed V3 <span class="price">44K</span></li>
+            <li>Envy V1 <span class="price">40K</span></li>
+            <li>Envy Modifikasi <span class="price">53.6K</span></li>
+            <li>Envy EVO <span class="price">40K</span></li>
+            <li>Lust <span class="price">21.6K</span></li>
+            <li>Doom V1 <span class="price">28.8K</span></li>
+            <li>Doom V2 <span class="price">39.2K</span></li>
+            <li>Doom V3 EVO <span class="price">50.4K</span></li>
+            <li>Gale Glave V1 <span class="price">50.4K</span></li>
+            <li>Gale Glave V2 <span class="price">68K</span></li>
+            <li>Serapah Noya <span class="price">72K</span></li>
+            <li>Danggger V1 <span class="price">50.4K</span></li>
+            <li>Danggger V2 <span class="price">46.4K</span></li>
+            <li>Kapak Malik God of Death <span class="price">57.6K</span></li>
+            <li>Scythe Cool <span class="price">46.4K</span></li>
+            <li>Scythe of Flamos <span class="price">28.8K</span></li>
+            <li>Scythe of Flamos V2 <span class="price">43.2K</span></li>
+            <li>Pride Stage 1/4 <span class="price">21.6K</span></li>
+            <li>Pride Stage 2/4 <span class="price">28.8K</span></li>
+            <li>Pride Stage 3/4 <span class="price">50.4K</span></li>
+            <li>Pride Stage 4/4 <span class="price">70k</span></li>
+            <li>Doombringer [Yellow] <span class="price">43.2K</span></li>
+            <li>Doom Frosh Fire <span class="price">50.4K</span></li>
+            <li>Ketupat Blade <span class="price">28.8K</span></li>
+            <li>Alok Bow [FF] <span class="price">36K</span></li>
+            <li>Shiny Bow of Archer <span class="price">44K</span></li>
+            <li>Sworld of Abyssion <span class="price">52k</span></li>
+            <li>Danggger of ZerapH [Neko] <span class="price">32K</span></li>
+            <li>Aysel Sworld [Awaked] <span class="price">60K</span></li>
+            <li>Magma Destrover [Panas] <span class="price">28K</span></li>
+            <li>Phoenix <span class="price">52K</span></li>
+            <li>PS OP Zoro Enma <span class="price">61k</span></li>
+            <li>Key Legends <span class="price">0.8K</span></li>
+            <li>Key Supream <span class="price">1.6K</span></li>
+            <li>Demonic Sworld <span class="price">36.8K</span></li>
+            <li>Poseidon [Lepas Kontrak] <span class="price">60K</span></li>
+            <li>Moonlight Sword [!] <span class="price">40K</span></li>
+            <li>Sworld Galaxy <span class="price">96K</span></li>
+            <li>Dragon Solar OP <span class="price">68K</span></li>
+            <li>Starlight Blade <span class="price">52K</span></li>
+            <li>Berseker <span class="price">44K</span></li>
+            <li>Peju Crossbow <span class="price">36</span></li>
+            <li>Lightbringer Radiant Serapah OP <span class="price">60K</span></li>
+        </ul>
+        
+        <h3>Rank List</h3>
+        <ul>
+            <li>Hero <span class="price">15K</span></li>
+            <li>Master <span class="price">35K</span></li>
+            <li>MVP <span class="price">40K</span></li>
+            <li>MVP+ <span class="price">60kK</span></li>
+            <li>MVP++ <span class="price">80k</span></li>
+        </ul>
+        
+        <div class="note-section">
+            <p><strong>📌 Note X Zentara P2W</strong></p>
+            <p>Setiap pembelian auto REFUND 100% kalau gagal</p>
+            <p>BONUS Key setiap transaksi 🎁 (3x bonus key)</p>
+            <p>Diskon 5%</p>
+            <p>Diskon: Sampai Hari Senin Aja</p>
+        </div>
+    </div>
+</div>
+
+<div class="slide" id="support">
+    <div class="support-card">
+        <h2><i class="fa-solid fa-user"></i> SUPPORTER</h2>
+        <p class="desc">Daftar Supporter</p>
+        <table class="support-table">
+            <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Title</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>RifaiMC</td>
+                <td>Owner</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Zavior</td>
+                <td>Owner</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Xio</td>
+                <td>Developer</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="slide" id="contact">
+    <div class="contact-footer">
+        Berikut adalah beberapa cara untuk menghubungi kami.
+        Silakan pilih platform yang paling nyaman bagi Anda.
+    </div>
+    <div class="contact-grid">
+        <a href="https://t.me/bukan_mastah_id" class="contact-card" target="_blank">
+            <i class="fa-brands fa-telegram"></i><span>Telegram</span>
+        </a>
+        <a href="https://wa.me/6285609468012" class="contact-card" target="_blank">
+            <i class="fa-brands fa-whatsapp"></i><span>(WhatsApp owner) Zavior</span>
+        </a>
+        <a href="https://wa.me/6285609468012" class="contact-card" target="_blank">
+            <i class="fa-brands fa-whatsapp"></i><span>(WhatsApp owner) Rifai</span>
+        </a>
+        <a href="https://wa.me/6285609468012" class="contact-card" target="_blank">
+            <i class="fa-brands fa-whatsapp"></i><span>(WhatsApp developer) Xio</span>
+        </a>
+    </div>
+    <footer class="site-footer">
+        © 2025 Zentara Legends | Crafted with 🤍 by Xioo
+    </footer>
+</div>
+
+<div class="slide" id="creator">
+    <div class="creator-card">
+        <h2><i class="fa-solid fa-code"></i> PEMBUAT WEBSITE</h2>
+        <p>Website ini dibuat dengan ❤️ oleh BUKAN MASTAH. Jika Anda menyukai desain website ini atau membutuhkan jasa pembuatan website, silakan hubungi saya melalui media sosial di bawah ini.</p>
+    </div>
+    <div class="creator-grid">
+        <a href="https://wa.me/62882019910819?text=Halo%20Xioo,%20saya%20tertarik%20dengan%20jasa%20pembuatan%20website" class="creator-social" target="_blank">
+            <i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span>
+        </a>
+        <a href="https://t.me/bukan_mastah_owner" class="creator-social" target="_blank">
+            <i class="fa-brands fa-telegram"></i><span>Telegram</span>
+        </a>
+        <a href="https://youtube.com/@bukan_mastah?si=oluCcwJ3CVP1hD11" class="creator-social" target="_blank">
+            <i class="fa-brands fa-youtube"></i><span>YouTube</span>
+        </a>
+        <a href="https://www.instagram.com/" class="creator-social" target="_blank">
+            <i class="fa-brands fa-instagram"></i><span>Instagram</span>
+        </a>
+    </div>
+</div>
+
+<div class="navbar">
+    <button class="nav-btn active" onclick="showSlide('about', this)">
+        <i class="fa-solid fa-user"></i><span>About</span>
+    </button>
+    <button class="nav-btn" onclick="showSlide('product', this)">
+        <i class="fa-solid fa-box"></i><span>Product</span>
+    </button>
+    <button class="nav-btn" onclick="showSlide('support', this)">
+        <i class="fa-solid fa-headset"></i><span>Support</span>
+    </button>
+    <button class="nav-btn" onclick="showSlide('contact', this)">
+        <i class="fa-solid fa-envelope"></i><span>Contact</span>
+    </button>
+    <button class="nav-btn" onclick="showSlide('creator', this)">
+        <i class="fa-solid fa-code"></i><span>Creator</span>
+    </button>
+</div>
+
+<script>
+    function showSlide(id, el) {
+        document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        el.classList.add('active');
+    }
+</script>
+
+</body>
+</html>
