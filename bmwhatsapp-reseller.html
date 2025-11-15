@@ -20,11 +20,6 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       position: relative;
     }
-    .login-container h1 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 30px;
-    }
     .panel-container {
       display: none;
       min-height: 100vh;
@@ -114,6 +109,10 @@
     button:hover {
       background: #0056b3;
     }
+    button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
     .delete-btn {
       background: #e74c3c;
       padding: 5px 10px;
@@ -181,6 +180,24 @@
       font-size: 14px;
       color: #7f8c8d;
       margin-top: 5px;
+    }
+    .daily-limit-warning {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      padding: 12px;
+      border-radius: 4px;
+      margin: 15px 0;
+      text-align: center;
+    }
+    .daily-limit-reached {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 12px;
+      border-radius: 4px;
+      margin: 15px 0;
+      text-align: center;
     }
     .reseller-id-display {
       background: #34495e;
@@ -486,6 +503,10 @@
             Sisa Coin Anda: <span class="coin-count" id="remainingCoin">0</span>
             <div class="usage-info">1 Coin = 1 User (Maks 3 user/hari)</div>
           </div>
+          
+          <!-- Info Pembatasan Harian -->
+          <div id="dailyLimitInfoDashboard" class="daily-limit-info"></div>
+          
           <div class="stats-container">
             <div class="stat-card" style="border-left: 4px solid #3498db;">
               <h3>Total User</h3>
@@ -513,6 +534,9 @@
             Sisa Coin Anda: <span class="coin-count" id="addUserRemainingCoin">0</span>
             <div class="usage-info" id="dailyLimitInfo"></div>
           </div>
+          
+          <!-- Warning Pembatasan Harian -->
+          <div id="dailyLimitWarning"></div>
           
           <div class="tab-container">
             <div class="tab active" onclick="openUserTab(event, 'regularUser')">User Regular</div>
@@ -574,7 +598,7 @@
                     <option value="inactive">Nonaktif</option>
                   </select>
                 </div>
-                <button type="submit" class="vip-btn">Tambah User VIP</button>
+                <button type="submit" class="vip-btn" id="submitVipBtn">Tambah User VIP</button>
               </form>
             </div>
           </div>
@@ -696,6 +720,7 @@
     let currentReseller = null;
     let today = new Date().toISOString().split('T')[0];
     let dailyUsage = 0;
+    const DAILY_LIMIT = 3; // Batas maksimal user per hari
 
     // Fungsi login
     document.getElementById("loginFormElement").addEventListener("submit", async function(e) {
@@ -732,10 +757,10 @@
             loadProfilePicture();
             
             // Update dashboard
-            updateDashboard();
+            await updateDashboard();
             
             // Cek penggunaan hari ini
-            checkDailyUsage();
+            await checkDailyUsage();
             
             // Set tanggal VIP (1 bulan dari sekarang)
             setVipExpiryDate();
@@ -777,14 +802,11 @@
       
       // Update info coin di berbagai section
       if (currentReseller) {
-        document.getElementById('remainingCoin').textContent = currentReseller.coin || 0;
-        document.getElementById('addUserRemainingCoin').textContent = currentReseller.coin || 0;
-        document.getElementById('coinInfoRemaining').textContent = currentReseller.coin || 0;
+        updateCoinDisplay();
         
         // Update info limit harian
         if (sectionId === 'addUser') {
-          document.getElementById('dailyLimitInfo').textContent = 
-            `Anda telah menambahkan ${dailyUsage}/3 user hari ini`;
+          updateDailyLimitDisplay();
         }
         
         // Jika menampilkan daftar user, muat ulang data
@@ -806,6 +828,110 @@
         if (sectionId === 'profileSettings') {
           loadProfileData();
         }
+        
+        // Update info pembatasan di dashboard
+        if (sectionId === 'dashboard') {
+          updateDashboardLimitInfo();
+        }
+      }
+    }
+
+    // Fungsi untuk memperbarui tampilan coin di semua section
+    function updateCoinDisplay() {
+      if (!currentReseller) return;
+      
+      const coinValue = currentReseller.coin || 0;
+      document.getElementById('remainingCoin').textContent = coinValue;
+      document.getElementById('addUserRemainingCoin').textContent = coinValue;
+      document.getElementById('coinInfoRemaining').textContent = coinValue;
+    }
+
+    // Fungsi untuk menampilkan info pembatasan harian
+    function updateDailyLimitDisplay() {
+      if (!currentReseller) return;
+      
+      const remainingSlots = DAILY_LIMIT - dailyUsage;
+      const warningElement = document.getElementById('dailyLimitWarning');
+      
+      if (dailyUsage >= DAILY_LIMIT) {
+        // Batas harian tercapai
+        warningElement.innerHTML = `
+          <div class="daily-limit-reached">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Batas Harian Tercapai!</strong><br>
+            Anda telah menambahkan ${dailyUsage} user hari ini. 
+            Anda dapat menambahkan user lagi besok.
+          </div>
+        `;
+        
+        // Nonaktifkan tombol submit
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitVipBtn').disabled = true;
+        document.getElementById('submitBtn').textContent = 'Batas Harian Tercapai';
+        document.getElementById('submitVipBtn').textContent = 'Batas Harian Tercapai';
+        
+      } else if (dailyUsage >= DAILY_LIMIT - 1) {
+        // Hanya tersisa 1 slot
+        warningElement.innerHTML = `
+          <div class="daily-limit-warning">
+            <i class="fas fa-info-circle"></i>
+            <strong>Peringatan:</strong> Anda hanya dapat menambahkan 1 user lagi hari ini.
+            (${dailyUsage}/${DAILY_LIMIT} user telah digunakan)
+          </div>
+        `;
+        
+        // Aktifkan tombol submit
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitVipBtn').disabled = false;
+        document.getElementById('submitBtn').textContent = 'Tambah User Regular';
+        document.getElementById('submitVipBtn').textContent = 'Tambah User VIP';
+        
+      } else {
+        // Masih ada slot tersedia
+        warningElement.innerHTML = `
+          <div class="daily-limit-warning">
+            <i class="fas fa-info-circle"></i>
+            Anda dapat menambahkan ${remainingSlots} user lagi hari ini.
+            (${dailyUsage}/${DAILY_LIMIT} user telah digunakan)
+          </div>
+        `;
+        
+        // Aktifkan tombol submit
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('submitVipBtn').disabled = false;
+        document.getElementById('submitBtn').textContent = 'Tambah User Regular';
+        document.getElementById('submitVipBtn').textContent = 'Tambah User VIP';
+      }
+      
+      // Update info di section add user
+      document.getElementById('dailyLimitInfo').textContent = 
+        `Anda telah menambahkan ${dailyUsage}/${DAILY_LIMIT} user hari ini`;
+    }
+
+    // Fungsi untuk menampilkan info pembatasan di dashboard
+    function updateDashboardLimitInfo() {
+      if (!currentReseller) return;
+      
+      const remainingSlots = DAILY_LIMIT - dailyUsage;
+      const limitElement = document.getElementById('dailyLimitInfoDashboard');
+      
+      if (dailyUsage >= DAILY_LIMIT) {
+        limitElement.innerHTML = `
+          <div class="daily-limit-reached">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Batas Harian Tercapai!</strong> 
+            Anda telah menambahkan ${dailyUsage} user hari ini.
+          </div>
+        `;
+      } else {
+        limitElement.innerHTML = `
+          <div class="daily-limit-warning">
+            <i class="fas fa-info-circle"></i>
+            <strong>Batas Harian:</strong> 
+            ${dailyUsage}/${DAILY_LIMIT} user digunakan hari ini. 
+            ${remainingSlots} slot tersisa.
+          </div>
+        `;
       }
     }
 
@@ -840,6 +966,17 @@
       if (!currentReseller) return;
       
       try {
+        // Ambil data reseller terbaru dari database
+        const resellerRes = await fetch(dbUrl + "resellers.json");
+        const resellers = await resellerRes.json();
+        
+        if (Array.isArray(resellers)) {
+          const updatedReseller = resellers.find(r => r.id === currentReseller.id);
+          if (updatedReseller) {
+            currentReseller = updatedReseller;
+          }
+        }
+        
         // Ambil data user
         const usersRes = await fetch(dbUrl + "licenses.json");
         const usersData = await usersRes.json();
@@ -895,8 +1032,11 @@
         document.getElementById('expiredLicenses').textContent = expiredLicenses;
         document.getElementById('totalVipUsers').textContent = vipList.length;
         
-        // Update info coin
-        document.getElementById('remainingCoin').textContent = currentReseller.coin || 0;
+        // Update info coin dengan format yang benar
+        updateCoinDisplay();
+        
+        // Update info pembatasan harian
+        updateDashboardLimitInfo();
         
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -916,6 +1056,11 @@
         } else {
           dailyUsage = 0;
         }
+        
+        // Update tampilan pembatasan
+        updateDailyLimitDisplay();
+        updateDashboardLimitInfo();
+        
       } catch (error) {
         console.error("Error checking daily usage:", error);
         dailyUsage = 0;
@@ -926,15 +1071,16 @@
     async function addUser(user) {
       if (!currentReseller) return;
       
-      // Validasi coin
-      if (currentReseller.coin < 1) {
+      // Validasi coin yang lebih ketat
+      const currentCoin = currentReseller.coin || 0;
+      if (currentCoin < 1) {
         alert("Coin Anda tidak cukup!");
         return;
       }
       
-      // Validasi limit harian
-      if (dailyUsage >= 3) {
-        alert("Anda sudah mencapai batas penambahan user hari ini (maks 3 user/hari)");
+      // PERBAIKAN: Validasi batas harian yang lebih ketat
+      if (dailyUsage >= DAILY_LIMIT) {
+        alert(`Anda sudah mencapai batas penambahan user hari ini (maks ${DAILY_LIMIT} user/hari). Silakan coba lagi besok.`);
         return;
       }
       
@@ -966,7 +1112,7 @@
           headers: {"Content-Type": "application/json"}
         });
         
-        // Kurangi coin reseller
+        // Kurangi coin reseller dengan benar
         await updateResellerCoin(-1);
         
         // Update penggunaan harian
@@ -975,7 +1121,7 @@
         // Update UI
         alert("User berhasil ditambahkan!");
         document.getElementById("addUserForm").reset();
-        updateDashboard();
+        await updateDashboard(); // Tunggu update selesai
         loadUserList(); // Muat ulang daftar user
         showSection('userList'); // Tampilkan halaman daftar user
         
@@ -989,15 +1135,16 @@
     async function addVipUser(vipUser) {
       if (!currentReseller) return;
       
-      // Validasi coin
-      if (currentReseller.coin < 1) {
+      // Validasi coin yang lebih ketat
+      const currentCoin = currentReseller.coin || 0;
+      if (currentCoin < 1) {
         alert("Coin Anda tidak cukup!");
         return;
       }
       
-      // Validasi limit harian
-      if (dailyUsage >= 3) {
-        alert("Anda sudah mencapai batas penambahan user hari ini (maks 3 user/hari)");
+      // PERBAIKAN: Validasi batas harian yang lebih ketat
+      if (dailyUsage >= DAILY_LIMIT) {
+        alert(`Anda sudah mencapai batas penambahan user hari ini (maks ${DAILY_LIMIT} user/hari). Silakan coba lagi besok.`);
         return;
       }
       
@@ -1034,7 +1181,7 @@
           headers: {"Content-Type": "application/json"}
         });
         
-        // Kurangi coin reseller
+        // Kurangi coin reseller dengan benar
         await updateResellerCoin(-1);
         
         // Update penggunaan harian
@@ -1044,7 +1191,7 @@
         alert("User VIP berhasil ditambahkan!");
         document.getElementById("addVipUserForm").reset();
         setVipExpiryDate(); // Reset tanggal VIP
-        updateDashboard();
+        await updateDashboard(); // Tunggu update selesai
         loadVipUsers(); // Muat ulang daftar VIP
         showSection('vipManagement'); // Tampilkan halaman VIP
         
@@ -1054,7 +1201,7 @@
       }
     }
 
-    // Update coin reseller
+    // Update coin reseller dengan validasi
     async function updateResellerCoin(amount) {
       try {
         const resellerRes = await fetch(dbUrl + "resellers.json");
@@ -1063,7 +1210,16 @@
         if (Array.isArray(resellers)) {
           const resellerIndex = resellers.findIndex(r => r.id === currentReseller.id);
           if (resellerIndex !== -1) {
-            resellers[resellerIndex].coin += amount;
+            // Validasi agar coin tidak minus
+            const newCoinValue = resellers[resellerIndex].coin + amount;
+            if (newCoinValue < 0) {
+              alert("Coin tidak mencukupi!");
+              throw new Error("Insufficient coins");
+            }
+            
+            resellers[resellerIndex].coin = newCoinValue;
+            
+            // Pastikan userCount ada
             if (!resellers[resellerIndex].userCount) {
               resellers[resellerIndex].userCount = 0;
             }
@@ -1077,10 +1233,14 @@
             
             // Update data reseller saat ini
             currentReseller = resellers[resellerIndex];
+            
+            // Update tampilan coin
+            updateCoinDisplay();
           }
         }
       } catch (error) {
         console.error("Error updating reseller coin:", error);
+        throw error; // Lempar error untuk ditangani di caller
       }
     }
 
@@ -1105,6 +1265,11 @@
         });
         
         dailyUsage = usageData[currentReseller.id][today];
+        
+        // Update tampilan pembatasan
+        updateDailyLimitDisplay();
+        updateDashboardLimitInfo();
+        
       } catch (error) {
         console.error("Error updating daily usage:", error);
       }
@@ -1113,6 +1278,13 @@
     // Form tambah user regular
     document.getElementById("addUserForm").addEventListener("submit", function(e) {
       e.preventDefault();
+      
+      // Validasi batas harian sebelum submit
+      if (dailyUsage >= DAILY_LIMIT) {
+        alert(`Anda sudah mencapai batas penambahan user hari ini (maks ${DAILY_LIMIT} user/hari). Silakan coba lagi besok.`);
+        return;
+      }
+      
       const user = {
         id: document.getElementById("id").value,
         username: document.getElementById("username").value,
@@ -1126,6 +1298,13 @@
     // Form tambah user VIP
     document.getElementById("addVipUserForm").addEventListener("submit", function(e) {
       e.preventDefault();
+      
+      // Validasi batas harian sebelum submit
+      if (dailyUsage >= DAILY_LIMIT) {
+        alert(`Anda sudah mencapai batas penambahan user hari ini (maks ${DAILY_LIMIT} user/hari). Silakan coba lagi besok.`);
+        return;
+      }
+      
       const vipUser = {
         deviceId: document.getElementById("vipDeviceId").value,
         name: document.getElementById("vipUsername").value,
