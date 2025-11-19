@@ -796,7 +796,7 @@
         </table>
       </div>
       
-      <!-- VIP Management Section -->
+      <!-- VIP Management Section - DIPERBAIKI -->
       <div id="vipManagement" class="content-section hidden">
         <h1 class="section-title">Kelola User VIP</h1>
         <div class="filter-container">
@@ -806,6 +806,9 @@
             <option value="active">Aktif</option>
             <option value="expired">Expired</option>
           </select>
+          <select id="vipResellerFilter" style="padding: 10px;">
+            <option value="">Semua Reseller</option>
+          </select>
         </div>
         <table id="vipTable">
           <thead>
@@ -814,6 +817,7 @@
               <th>Nama</th>
               <th>Expiry Time</th>
               <th>Status</th>
+              <th>Reseller</th>
               <th>Created At</th>
               <th>Action</th>
             </tr>
@@ -822,7 +826,7 @@
         </table>
       </div>
       
-      <!-- Add VIP User Section -->
+      <!-- Add VIP User Section - DIPERBAIKI -->
       <div id="addVipUser" class="content-section hidden">
         <h1 class="section-title">Tambah User VIP</h1>
         <div class="form-container">
@@ -844,6 +848,12 @@
               <select id="vipStatus">
                 <option value="active">Aktif</option>
                 <option value="inactive">Nonaktif</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="vipResellerId">Reseller</label>
+              <select id="vipResellerId">
+                <option value="">Tanpa Reseller</option>
               </select>
             </div>
             <button type="submit">Tambah User VIP</button>
@@ -1250,9 +1260,11 @@
         populateChatResellerFilter();
       } else if (sectionId === 'vipManagement') {
         fetchVipUsers();
+        populateVipResellerFilter();
       } else if (sectionId === 'addVipUser') {
         // Reset form
         document.getElementById('addVipUserForm').reset();
+        populateVipResellerDropdown();
       }
     }
 
@@ -1358,11 +1370,16 @@
       }
     }
 
-    // Ambil data user VIP
+    // Ambil data user VIP - DIPERBAIKI
     async function fetchVipUsers() {
       try {
-        const res = await fetch(getFirebasePath('vip'));
-        const vipData = await res.json();
+        const [vipRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('vip')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        const vipData = await vipRes.json();
+        const resellersData = await resellersRes.json();
         const tbody = document.querySelector("#vipTable tbody");
         tbody.innerHTML = "";
         
@@ -1372,6 +1389,13 @@
           Object.entries(vipData.allowed_devices).forEach(([deviceId, userData]) => {
             const expiryTime = userData.expiry_time;
             const isExpired = expiryTime < now;
+            
+            // Cari nama reseller
+            let resellerName = 'Owner';
+            if (userData.resellerId && Array.isArray(resellersData)) {
+              const reseller = resellersData.find(r => r.id === userData.resellerId);
+              resellerName = reseller ? reseller.name : 'Unknown';
+            }
             
             const tr = document.createElement("tr");
             tr.innerHTML = `
@@ -1383,6 +1407,7 @@
                   ${isExpired ? 'Expired' : 'VIP'}
                 </span>
               </td>
+              <td>${resellerName}</td>
               <td>${new Date(userData.created_at).toLocaleDateString()}</td>
               <td>
                 <div class="action-buttons">
@@ -1403,7 +1428,7 @@
       }
     }
 
-    // Tambah user VIP
+    // Tambah user VIP - DIPERBAIKI
     async function addVipUser(vipUser) {
       try {
         const res = await fetch(getFirebasePath('vip'));
@@ -1420,7 +1445,8 @@
           name: vipUser.name,
           expiry_time: vipUser.expiry_time,
           status: vipUser.status,
-          created_at: vipUser.created_at
+          created_at: vipUser.created_at,
+          resellerId: vipUser.resellerId || null
         };
         
         await fetch(getFirebasePath('vip'), {
@@ -1433,7 +1459,8 @@
         await logActivity({
           type: 'vip_created',
           deviceId: vipUser.deviceId,
-          name: vipUser.name
+          name: vipUser.name,
+          resellerId: vipUser.resellerId || null
         });
         
         fetchVipUsers();
@@ -1444,11 +1471,16 @@
       }
     }
 
-    // Edit user VIP
+    // Edit user VIP - DIPERBAIKI
     async function editVipUser(deviceId) {
       try {
-        const res = await fetch(getFirebasePath('vip'));
-        let vipData = await res.json();
+        const [vipRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('vip')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        let vipData = await vipRes.json();
+        const resellersData = await resellersRes.json();
         
         if (!vipData || !vipData.allowed_devices || !vipData.allowed_devices[deviceId]) {
           alert("User VIP tidak ditemukan!");
@@ -1468,11 +1500,23 @@
         const newStatus = prompt("Edit Status (active/inactive):", vipUser.status);
         if (newStatus === null) return;
         
+        // Tampilkan pilihan reseller
+        let resellerOptions = "Owner\n";
+        if (Array.isArray(resellersData)) {
+          resellersData.forEach(reseller => {
+            resellerOptions += `${reseller.id}: ${reseller.name}\n`;
+          });
+        }
+        
+        const newResellerId = prompt(`Edit Reseller:\n${resellerOptions}`, vipUser.resellerId || '');
+        if (newResellerId === null) return;
+        
         vipData.allowed_devices[deviceId] = {
           ...vipUser,
           name: newName,
           expiry_time: new Date(newExpiryTime).getTime(),
-          status: newStatus
+          status: newStatus,
+          resellerId: newResellerId || null
         };
         
         await fetch(getFirebasePath('vip'), {
@@ -1504,7 +1548,8 @@
         await logActivity({
           type: 'vip_deleted',
           deviceId: deviceId,
-          name: deletedUser.name
+          name: deletedUser.name,
+          resellerId: deletedUser.resellerId || null
         });
         
         delete vipData.allowed_devices[deviceId];
@@ -1525,6 +1570,28 @@
     // Populate reseller dropdown di form tambah user
     async function populateResellerDropdown() {
       const select = document.getElementById('resellerId');
+      select.innerHTML = '<option value="">Tanpa Reseller</option>';
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          data.forEach(reseller => {
+            const option = document.createElement('option');
+            option.value = reseller.id;
+            option.textContent = reseller.name;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching resellers:", error);
+      }
+    }
+
+    // Populate reseller dropdown di form tambah user VIP - BARU
+    async function populateVipResellerDropdown() {
+      const select = document.getElementById('vipResellerId');
       select.innerHTML = '<option value="">Tanpa Reseller</option>';
       
       try {
@@ -1569,6 +1636,28 @@
     // Populate reseller filter di activity log
     async function populateActivityResellerFilter() {
       const select = document.getElementById('activityResellerFilter');
+      select.innerHTML = '<option value="">Semua Reseller</option>';
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          data.forEach(reseller => {
+            const option = document.createElement('option');
+            option.value = reseller.id;
+            option.textContent = reseller.name;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching resellers:", error);
+      }
+    }
+
+    // Populate reseller filter di user VIP - BARU
+    async function populateVipResellerFilter() {
+      const select = document.getElementById('vipResellerFilter');
       select.innerHTML = '<option value="">Semua Reseller</option>';
       
       try {
@@ -2256,7 +2345,7 @@
       }
     }
 
-    // Filter user VIP
+    // Filter user VIP - DIPERBAIKI
     document.getElementById("vipSearchInput").addEventListener("input", function(e) {
       filterVipUsers();
     });
@@ -2265,13 +2354,23 @@
       filterVipUsers();
     });
     
+    document.getElementById("vipResellerFilter").addEventListener("change", function() {
+      filterVipUsers();
+    });
+    
     async function filterVipUsers() {
       const searchTerm = document.getElementById("vipSearchInput").value.toLowerCase();
       const statusFilter = document.getElementById("vipStatusFilter").value;
+      const resellerFilter = document.getElementById("vipResellerFilter").value;
       
       try {
-        const res = await fetch(getFirebasePath('vip'));
-        const vipData = await res.json();
+        const [vipRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('vip')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        const vipData = await vipRes.json();
+        const resellersData = await resellersRes.json();
         const tbody = document.querySelector("#vipTable tbody");
         tbody.innerHTML = "";
         
@@ -2281,6 +2380,13 @@
           Object.entries(vipData.allowed_devices).forEach(([deviceId, userData]) => {
             const expiryTime = userData.expiry_time;
             const isExpired = expiryTime < now;
+            
+            // Cari nama reseller
+            let resellerName = 'Owner';
+            if (userData.resellerId && Array.isArray(resellersData)) {
+              const reseller = resellersData.find(r => r.id === userData.resellerId);
+              resellerName = reseller ? reseller.name : 'Unknown';
+            }
             
             // Filter berdasarkan kriteria
             const matchesSearch = 
@@ -2292,7 +2398,12 @@
               (statusFilter === 'active' && !isExpired) || 
               (statusFilter === 'expired' && isExpired);
             
-            if (matchesSearch && matchesStatus) {
+            const matchesReseller = 
+              !resellerFilter || 
+              (resellerFilter === '' && !userData.resellerId) || 
+              userData.resellerId === resellerFilter;
+            
+            if (matchesSearch && matchesStatus && matchesReseller) {
               const tr = document.createElement("tr");
               tr.innerHTML = `
                 <td>${deviceId}</td>
@@ -2303,6 +2414,7 @@
                     ${isExpired ? 'Expired' : 'VIP'}
                   </span>
                 </td>
+                <td>${resellerName}</td>
                 <td>${new Date(userData.created_at).toLocaleDateString()}</td>
                 <td>
                   <div class="action-buttons">
@@ -2352,7 +2464,7 @@
       e.target.reset();
     });
     
-    // Form tambah user VIP
+    // Form tambah user VIP - DIPERBAIKI
     document.getElementById("addVipUserForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const vipUser = {
@@ -2360,6 +2472,7 @@
         name: document.getElementById("vipName").value,
         expiry_time: new Date(document.getElementById("vipExpiryTime").value).getTime(),
         status: document.getElementById("vipStatus").value,
+        resellerId: document.getElementById("vipResellerId").value || null,
         created_at: Date.now()
       };
       addVipUser(vipUser);
