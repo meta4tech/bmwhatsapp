@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel Owner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Tambahkan Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <style>
+    /* Login Form Styles */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f8f9fa;
+    }
+    
+    .login-form {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    .login-form h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #2c3e50;
+    }
+    
+    .login-form .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .login-form label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #495057;
+    }
+    
+    .login-form input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    
+    .login-form button {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .login-form button:hover {
+      background: #0069d9;
+    }
+    
+    .login-error {
+      color: #dc3545;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    .login-loading {
+      text-align: center;
+      margin-top: 15px;
+      color: #6c757d;
+    }
+    
+    /* Main app styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .sidebar {
+      width: 250px;
+      background: #343a40;
+      color: white;
+      padding: 20px 0;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar-content {
+      flex: 1;
+    }
+    
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #495057;
+      font-weight: 600;
+    }
+    
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .sidebar li {
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    
+    .sidebar li:hover {
+      background: #495057;
+      border-left: 4px solid #007bff;
+    }
+    
+    .sidebar li.active {
+      background: #495057;
+      border-left: 4px solid #007bff;
+    }
+    
+    .sidebar li i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      background: #f8f9fa;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-top: 0;
+      font-weight: 600;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    table th, table td {
+      padding: 15px;
+      border: 1px solid #e9ecef;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+    
+    table th {
+      background: #007bff;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+    
+    tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .form-container {
+      background: white;
+      padding: 25px;
+      margin-top: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-radius: 8px;
+    }
+    
+    input, select, button, textarea {
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+    
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      background: #0069d9;
+      transform: translateY(-1px);
+    }
+    
+    .delete-btn {
+      background: #dc3545;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      margin-left: 5px;
+    }
+    
+    .delete-btn:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+    
+    .edit-btn {
+      background: #17a2b8;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      border-radius: 4px;
+    }
+    
+    .edit-btn:hover {
+      background: #138496;
+      transform: translateY(-1px);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #495057;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .section-title {
+      color: #2c3e50;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #007bff;
+      margin-bottom: 25px;
+      font-weight: 600;
+    }
+    
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card h3 {
+      margin-top: 0;
+      color: #6c757d;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    
+    .stat-card p {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 0;
+      color: #2c3e50;
+    }
+    
+    .filter-container {
+      margin-bottom: 25px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filter-container select, .filter-container input {
+      width: auto;
+      min-width: 200px;
+      padding: 10px;
+      margin: 0;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .badge-active {
+      background: #28a745;
+      color: white;
+    }
+    
+    .badge-expired {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .badge-vip {
+      background: #ffc107;
+      color: #212529;
+    }
+    
+    .status-cell {
+      text-align: center;
+    }
+    
+    .settings-form {
+      background: white;
+      padding: 25px;
+      margin-top: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-radius: 8px;
+    }
+    
+    .tab-container {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      border-radius: 5px 5px 0 0;
+      margin-right: 5px;
+    }
+    
+    .tab.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .json-preview {
+      background: #2d2d2d;
+      color: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      margin: 15px 0;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .update-btn {
+      background: #6f42c1;
+    }
+    
+    .update-btn:hover {
+      background: #5a2d9c;
+    }
+    
+    .app-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .app-option {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .app-option:hover {
+      border-color: #007bff;
+      transform: translateY(-3px);
+    }
+    
+    .app-option.selected {
+      border-color: #007bff;
+      background-color: #f0f8ff;
+    }
+    
+    .app-option i {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: #007bff;
+    }
+    
+    .chat-container {
+      background: white;
+      padding: 25px;
+      margin-top: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      height: 70vh;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      background: #f8f9fa;
+    }
+    
+    .message {
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 18px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+    
+    .message-owner {
+      background: #007bff;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message-reseller {
+      background: #e9ecef;
+      color: #333;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .message-sender {
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-bottom: 5px;
+    }
+    
+    .message-time {
+      font-size: 0.7rem;
+      text-align: right;
+      margin-top: 5px;
+      opacity: 0.7;
+    }
+    
+    .chat-input-container {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .chat-input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      resize: none;
+    }
+    
+    .chat-send-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .chat-send-btn:hover {
+      background: #0069d9;
+    }
+    
+    .reseller-selector {
+      margin-bottom: 15px;
+    }
+    
+    .logout-btn {
+      background: #dc3545;
+      margin: 20px;
+      padding: 10px;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .logout-btn:hover {
+      background: #c82333;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+  <!-- Login Form -->
+  <div id="loginContainer" class="login-container">
+    <div class="login-form">
+      <h2>Login Panel Owner</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="Masukkan email" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="Masukkan password" required>
+        </div>
+        <button type="submit">Login</button>
+        <div id="loginError" class="login-error"></div>
+        <div id="loginLoading" class="login-loading hidden">Memproses...</div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Main App (initially hidden) -->
+  <div id="appContainer" class="container hidden">
+    <div class="sidebar">
+      <h2>Panel Owner</h2>
+      <div class="sidebar-content">
+        <ul>
+          <li class="active" onclick="showSection('dashboard')">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+          </li>
+          <li onclick="showSection('userManagement')">
+            <i class="fas fa-users"></i> Kelola User
+          </li>
+          <li onclick="showSection('addUser')">
+            <i class="fas fa-user-plus"></i> Tambah User
+          </li>
+          <li onclick="showSection('resellerManagement')">
+            <i class="fas fa-store"></i> Kelola Reseller
+          </li>
+          <li onclick="showSection('addReseller')">
+            <i class="fas fa-user-tie"></i> Tambah Reseller
+          </li>
+          <li onclick="showSection('userActivity')">
+            <i class="fas fa-history"></i> Aktivitas User
+          </li>
+          <li onclick="showSection('vipManagement')">
+            <i class="fas fa-crown"></i> Kelola User VIP
+          </li>
+          <li onclick="showSection('addVipUser')">
+            <i class="fas fa-user-plus"></i> Tambah User VIP
+          </li>
+          <li onclick="showSection('sendUpdate')">
+            <i class="fas fa-bell"></i> Kirim Update
+          </li>
+          <li onclick="showSection('groupChat')">
+            <i class="fas fa-comments"></i> Percakapan Grup
+          </li>
+          <li onclick="showSection('settings')">
+            <i class="fas fa-cog"></i> Pengaturan
+          </li>
+        </ul>
+      </div>
+      <div class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </div>
+    </div>
+    
+    <div class="main-content">
+      <!-- Dashboard Section -->
+      <div id="dashboard" class="content-section">
+        <h1 class="section-title">Dashboard Owner</h1>
+        <div class="stats-container">
+          <div class="stat-card" style="border-left: 4px solid #3498db;">
+            <h3>Total User</h3>
+            <p id="totalUsers">Loading...</p>
+          </div>
+          <div class="stat-card" style="border-left: 4px solid #2ecc71;">
+            <h3>User Aktif</h3>
+            <p id="activeLicenses">Loading...</p>
+          </div>
+          <div class="stat-card" style="border-left: 4px solid #e74c3c;">
+            <h3>User Expired</h3>
+            <p id="expiredLicenses">Loading...</p>
+          </div>
+          <div class="stat-card" style="border-left: 4px solid #f39c12;">
+            <h3>Total Reseller</h3>
+            <p id="totalResellers">Loading...</p>
+          </div>
+          <div class="stat-card" style="border-left: 4px solid #9b59b6;">
+            <h3>User VIP</h3>
+            <p id="totalVipUsers">Loading...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- User Management Section -->
+      <div id="userManagement" class="content-section hidden">
+        <h1 class="section-title">Kelola User</h1>
+        <div class="filter-container">
+          <input type="text" id="searchInput" placeholder="Cari user..." style="padding: 10px; flex-grow: 1;">
+          <select id="resellerFilter" style="padding: 10px;">
+            <option value="">Semua Reseller</option>
+          </select>
+          <select id="statusFilter" style="padding: 10px;">
+            <option value="">Semua Status</option>
+            <option value="active">Aktif</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+        <table id="userTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Password</th>
+              <th>Expires At</th>
+              <th>Offline</th>
+              <th>Reseller</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <!-- Add User Section -->
+      <div id="addUser" class="content-section hidden">
+        <h1 class="section-title">Tambah User Baru</h1>
+        <div class="form-container">
+          <form id="addUserForm">
+            <div class="form-group">
+              <label for="id">Device ID</label>
+              <input type="text" id="id" placeholder="Masukkan device ID" required>
+            </div>
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" id="username" placeholder="Masukkan username" required>
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="text" id="password" placeholder="Masukkan password" required>
+            </div>
+            <div class="form-group">
+              <label for="expiresAt">Tanggal Expired</label>
+              <input type="date" id="expiresAt" required>
+            </div>
+            <div class="form-group">
+              <label for="allowOffline">Akses Offline</label>
+              <select id="allowOffline">
+                <option value="true">Diizinkan</option>
+                <option value="false">Tidak Diizinkan</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="resellerId">Reseller</label>
+              <select id="resellerId">
+                <option value="">Tanpa Reseller</option>
+              </select>
+            </div>
+            <button type="submit">Tambah User</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Reseller Management Section -->
+      <div id="resellerManagement" class="content-section hidden">
+        <h1 class="section-title">Kelola Reseller</h1>
+        <table id="resellerTable">
+          <thead>
+            <tr>
+              <th>ID Reseller</th>
+              <th>Nama</th>
+              <th>Coin</th>
+              <th>Jumlah User</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data reseller akan dimasukkan di sini oleh JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Add Reseller Section -->
+      <div id="addReseller" class="content-section hidden">
+        <h1 class="section-title">Tambah Reseller Baru</h1>
+        <div class="form-container">
+          <form id="addResellerForm">
+            <div class="form-group">
+              <label for="newResellerId">ID Reseller</label>
+              <input type="text" id="newResellerId" placeholder="Masukkan ID Reseller" required>
+            </div>
+            <div class="form-group">
+              <label for="resellerName">Nama Reseller</label>
+              <input type="text" id="resellerName" placeholder="Masukkan nama reseller" required>
+            </div>
+            <div class="form-group">
+              <label for="resellerCoin">Jumlah Coin</label>
+              <input type="number" id="resellerCoin" placeholder="Masukkan jumlah coin" value="0" required>
+            </div>
+            <button type="submit">Tambah Reseller</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- User Activity Section -->
+      <div id="userActivity" class="content-section hidden">
+        <h1 class="section-title">Aktivitas User</h1>
+        <div class="filter-container">
+          <select id="activityResellerFilter" style="padding: 10px;">
+            <option value="">Semua Reseller</option>
+          </select>
+          <select id="activityTypeFilter" style="padding: 10px;">
+            <option value="">Semua Aktivitas</option>
+            <option value="created">Pembuatan User</option>
+            <option value="deleted">Penghapusan User</option>
+          </select>
+          <input type="date" id="activityDateFilter" style="padding: 10px;">
+        </div>
+        <table id="activityTable">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Reseller</th>
+              <th>Aktivitas</th>
+              <th>User ID</th>
+              <th>Username</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <!-- VIP Management Section - DIPERBAIKI -->
+      <div id="vipManagement" class="content-section hidden">
+        <h1 class="section-title">Kelola User VIP</h1>
+        <div class="filter-container">
+          <input type="text" id="vipSearchInput" placeholder="Cari user VIP..." style="padding: 10px; flex-grow: 1;">
+          <select id="vipStatusFilter" style="padding: 10px;">
+            <option value="">Semua Status</option>
+            <option value="active">Aktif</option>
+            <option value="expired">Expired</option>
+          </select>
+          <select id="vipResellerFilter" style="padding: 10px;">
+            <option value="">Semua Reseller</option>
+          </select>
+        </div>
+        <table id="vipTable">
+          <thead>
+            <tr>
+              <th>Device ID</th>
+              <th>Nama</th>
+              <th>Expiry Time</th>
+              <th>Status</th>
+              <th>Reseller</th>
+              <th>Created At</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      
+      <!-- Add VIP User Section - DIPERBAIKI -->
+      <div id="addVipUser" class="content-section hidden">
+        <h1 class="section-title">Tambah User VIP</h1>
+        <div class="form-container">
+          <form id="addVipUserForm">
+            <div class="form-group">
+              <label for="vipDeviceId">Device ID</label>
+              <input type="text" id="vipDeviceId" placeholder="Masukkan device ID" required>
+            </div>
+            <div class="form-group">
+              <label for="vipName">Nama User VIP</label>
+              <input type="text" id="vipName" placeholder="Masukkan nama user VIP" required>
+            </div>
+            <div class="form-group">
+              <label for="vipExpiryTime">Tanggal Expired</label>
+              <input type="date" id="vipExpiryTime" required>
+            </div>
+            <div class="form-group">
+              <label for="vipStatus">Status</label>
+              <select id="vipStatus">
+                <option value="active">Aktif</option>
+                <option value="inactive">Nonaktif</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="vipResellerId">Reseller</label>
+              <select id="vipResellerId">
+                <option value="">Tanpa Reseller</option>
+              </select>
+            </div>
+            <button type="submit">Tambah User VIP</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Send Update Section -->
+      <div id="sendUpdate" class="content-section hidden">
+        <h1 class="section-title">Kirim Update Aplikasi</h1>
+        <div class="form-container">
+          <h3>Pilih Aplikasi yang Akan Dikirimi Update</h3>
+          <div class="app-selector" id="appSelector">
+            <div class="app-option" data-app="bmwhatsapp_msg" onclick="selectApp(this)">
+              <i class="fab fa-whatsapp"></i>
+              <h4>BMWhatsApp Msg</h4>
+            </div>
+            <div class="app-option" data-app="bmwhatsapp_six" onclick="selectApp(this)">
+              <i class="fab fa-whatsapp"></i>
+              <h4>BMWhatsApp Six</h4>
+            </div>
+            <div class="app-option" data-app="bmwhatsapp_x" onclick="selectApp(this)">
+              <i class="fab fa-whatsapp"></i>
+              <h4>BMWhatsApp X</h4>
+            </div>
+            <div class="app-option" data-app="bmwhatsapp_business" onclick="selectApp(this)">
+              <i class="fab fa-whatsapp"></i>
+              <h4>BMWhatsApp Business</h4>
+            </div>
+          </div>
+          
+          <form id="updateForm">
+            <div class="form-group">
+              <label for="updateVersion">Versi Update (format: YYMMDDNNNN)</label>
+              <input type="number" id="updateVersion" placeholder="2101020001" required>
+            </div>
+            <div class="form-group">
+              <label for="updateTitle">Judul Update</label>
+              <input type="text" id="updateTitle" placeholder="New Update Available" required>
+            </div>
+            <div class="form-group">
+              <label for="updateSubtitle">Subjudul Update</label>
+              <input type="text" id="updateSubtitle" placeholder="Update Your Application" required>
+            </div>
+            <div class="form-group">
+              <label for="updateLink">Link Update</label>
+              <input type="url" id="updateLink" placeholder="https://www.dpmods.com" required>
+            </div>
+            <div class="form-group">
+              <label for="closeButton">Tampilkan Tombol Close</label>
+              <select id="closeButton">
+                <option value="false">Tidak</option>
+                <option value="true">Ya</option>
+              </select>
+            </div>
+            <button type="submit" class="update-btn">Kirim Update</button>
+          </form>
+          
+          <h3 style="margin-top: 30px;">Pratinjau JSON</h3>
+          <div class="json-preview" id="updateJsonPreview">
+            {/* JSON akan ditampilkan di sini */}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Group Chat Section -->
+      <div id="groupChat" class="content-section hidden">
+        <h1 class="section-title">Percakapan Grup</h1>
+        <div class="chat-container">
+          <div class="reseller-selector">
+            <label for="resellerChatFilter">Filter berdasarkan Reseller:</label>
+            <select id="resellerChatFilter" style="padding: 8px; width: 200px; margin-left: 10px;">
+              <option value="all">Semua Reseller</option>
+            </select>
+          </div>
+          
+          <div class="chat-messages" id="chatMessages">
+            {/* Pesan akan ditampilkan di sini */}
+          </div>
+          
+          <div class="chat-input-container">
+            <textarea class="chat-input" id="chatInput" placeholder="Ketik pesan Anda di sini..." rows="1"></textarea>
+            <button class="chat-send-btn" id="chatSendBtn">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Settings Section -->
+      <div id="settings" class="content-section hidden">
+        <h1 class="section-title">Pengaturan Firebase</h1>
+        <div class="settings-form">
+          <form id="firebaseSettingsForm">
+            <div class="form-group">
+              <label for="firebaseUrl">Firebase Database URL</label>
+              <input type="text" id="firebaseUrl" placeholder="https://your-project.firebaseio.com" required>
+            </div>
+            <div class="form-group">
+              <label for="licensesPath">Path untuk Licenses</label>
+              <input type="text" id="licensesPath" placeholder="licenses" required>
+            </div>
+            <div class="form-group">
+              <label for="resellersPath">Path untuk Resellers</label>
+              <input type="text" id="resellersPath" placeholder="resellers" required>
+            </div>
+            <div class="form-group">
+              <label for="activitiesPath">Path untuk Activities</label>
+              <input type="text" id="activitiesPath" placeholder="activities" required>
+            </div>
+            <div class="form-group">
+              <label for="updatePath">Path untuk Update</label>
+              <input type="text" id="updatePath" placeholder="app_update" required>
+            </div>
+            <div class="form-group">
+              <label for="chatPath">Path untuk Chat</label>
+              <input type="text" id="chatPath" placeholder="group_chat" required>
+            </div>
+            <div class="form-group">
+              <label for="vipPath">Path untuk User VIP</label>
+              <input type="text" id="vipPath" placeholder="allowed_devices" required>
+            </div>
+            <button type="submit">Simpan Pengaturan</button>
+          </form>
+        </div>
+        
+        <div class="tab-container" style="margin-top: 30px;">
+          <div class="tab active" onclick="openTab(event, 'resellerConfig')">Konfigurasi Reseller</div>
+          <div class="tab" onclick="openTab(event, 'apiConfig')">Konfigurasi API</div>
+        </div>
+        
+        <div id="resellerConfig" class="tab-content active">
+          <div class="form-container">
+            <form id="resellerConfigForm">
+              <div class="form-group">
+                <label for="resellerApiKey">API Key untuk Reseller</label>
+                <input type="text" id="resellerApiKey" placeholder="Masukkan API Key khusus reseller">
+              </div>
+              <div class="form-group">
+                <label for="resellerFirebaseUrl">Default Firebase URL untuk Reseller</label>
+                <input type="text" id="resellerFirebaseUrl" placeholder="https://reseller-project.firebaseio.com">
+              </div>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" id="allowResellerCustomFirebase"> Izinkan Reseller menggunakan Firebase mereka sendiri
+                </label>
+              </div>
+              <button type="submit">Simpan Konfigurasi</button>
+            </form>
+          </div>
+        </div>
+        
+        <div id="apiConfig" class="tab-content">
+          <div class="form-container">
+            <form id="apiConfigForm">
+              <div class="form-group">
+                <label for="apiEndpoint">API Endpoint</label>
+                <input type="text" id="apiEndpoint" placeholder="https://api.example.com/v1">
+              </div>
+              <div class="form-group">
+                <label for="apiKey">API Key</label>
+                <input type="text" id="apiKey" placeholder="Masukkan API Key utama">
+              </div>
+              <div class="form-group">
+                <label for="apiSecret">API Secret</label>
+                <input type="password" id="apiSecret" placeholder="Masukkan API Secret">
+              </div>
+              <button type="submit">Simpan Konfigurasi</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration - Ganti dengan konfigurasi project Anda
+    const firebaseConfig = {
+      apiKey: "AIzaSyAPhmV0dV4kGVzh-F1kwE60L_kJYkHWmsg",
+      authDomain: "wa-license.firebaseapp.com",
+      databaseURL: "https://wa-license-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "wa-license",
+      storageBucket: "wa-license.firebasestorage.app",
+      messagingSenderId: "1035422404789",
+      appId: "1:1035422404789:web:3051b5229be239eaab2efc"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    
+    // Default Firebase database configuration
+    let databaseConfig = {
+      url: "https://wa-license-default-rtdb.asia-southeast1.firebasedatabase.app/",
+      paths: {
+        licenses: "licenses",
+        resellers: "resellers",
+        activities: "activities",
+        update: "app_update",
+        chat: "group_chat",
+        vip: "allowed_devices"
+      }
+    };
+    
+    // Reseller configuration
+    let resellerConfig = {
+      apiKey: "",
+      defaultFirebaseUrl: "",
+      allowCustomFirebase: false
+    };
+    
+    // API configuration
+    let apiConfig = {
+      endpoint: "",
+      apiKey: "",
+      apiSecret: ""
+    };
+    
+    // Selected app for update
+    let selectedApp = null;
+    
+    // Current user
+    let currentUser = null;
+    
+    // Check if user is logged in
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        // User is signed in
+        currentUser = user;
+        showApp();
+      } else {
+        // User is signed out
+        currentUser = null;
+        showLogin();
+      }
+    });
+    
+    // Show login form
+    function showLogin() {
+      document.getElementById('loginContainer').classList.remove('hidden');
+      document.getElementById('appContainer').classList.add('hidden');
+    }
+    
+    // Show main app
+    function showApp() {
+      document.getElementById('loginContainer').classList.add('hidden');
+      document.getElementById('appContainer').classList.remove('hidden');
+      
+      // Load configuration and initialize app
+      loadConfig();
+      updateDashboardStats();
+      
+      // Tampilkan dashboard secara default
+      document.getElementById('dashboard').classList.remove('hidden');
+      
+      // Inisialisasi filter
+      populateResellerFilter();
+      populateActivityResellerFilter();
+    }
+    
+    // Login function
+    function login(email, password) {
+      document.getElementById('loginError').textContent = '';
+      document.getElementById('loginLoading').classList.remove('hidden');
+      
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          // Login successful
+          document.getElementById('loginLoading').classList.add('hidden');
+        })
+        .catch((error) => {
+          // Handle errors
+          document.getElementById('loginLoading').classList.add('hidden');
+          document.getElementById('loginError').textContent = error.message;
+        });
+    }
+    
+    // Logout function
+    function logout() {
+      firebase.auth().signOut()
+        .then(() => {
+          // Sign-out successful
+        })
+        .catch((error) => {
+          console.error("Logout error:", error);
+        });
+    }
+    
+    // Load configuration from localStorage
+    function loadConfig() {
+      const savedConfig = localStorage.getItem('databaseConfig');
+      if (savedConfig) {
+        databaseConfig = JSON.parse(savedConfig);
+      }
+      
+      const savedResellerConfig = localStorage.getItem('resellerConfig');
+      if (savedResellerConfig) {
+        resellerConfig = JSON.parse(savedResellerConfig);
+      }
+      
+      const savedApiConfig = localStorage.getItem('apiConfig');
+      if (savedApiConfig) {
+        apiConfig = JSON.parse(savedApiConfig);
+      }
+      
+      // Update form fields
+      document.getElementById('firebaseUrl').value = databaseConfig.url;
+      document.getElementById('licensesPath').value = databaseConfig.paths.licenses;
+      document.getElementById('resellersPath').value = databaseConfig.paths.resellers;
+      document.getElementById('activitiesPath').value = databaseConfig.paths.activities;
+      document.getElementById('updatePath').value = databaseConfig.paths.update;
+      document.getElementById('chatPath').value = databaseConfig.paths.chat;
+      document.getElementById('vipPath').value = databaseConfig.paths.vip;
+      
+      document.getElementById('resellerApiKey').value = resellerConfig.apiKey;
+      document.getElementById('resellerFirebaseUrl').value = resellerConfig.defaultFirebaseUrl;
+      document.getElementById('allowResellerCustomFirebase').checked = resellerConfig.allowCustomFirebase;
+      
+      document.getElementById('apiEndpoint').value = apiConfig.endpoint;
+      document.getElementById('apiKey').value = apiConfig.apiKey;
+      document.getElementById('apiSecret').value = apiConfig.apiSecret;
+    }
+    
+    // Save configuration to localStorage
+    function saveConfig() {
+      localStorage.setItem('databaseConfig', JSON.stringify(databaseConfig));
+      localStorage.setItem('resellerConfig', JSON.stringify(resellerConfig));
+      localStorage.setItem('apiConfig', JSON.stringify(apiConfig));
+    }
+    
+    // Get full Firebase path
+    function getFirebasePath(collection) {
+      return databaseConfig.url + databaseConfig.paths[collection] + ".json";
+    }
+    
+    // Tab functionality
+    function openTab(evt, tabName) {
+      const tabContents = document.getElementsByClassName("tab-content");
+      for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove("active");
+      }
+      
+      const tabs = document.getElementsByClassName("tab");
+      for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("active");
+      }
+      
+      document.getElementById(tabName).classList.add("active");
+      evt.currentTarget.classList.add("active");
+    }
+    
+    // Select app for update
+    function selectApp(element) {
+      // Remove selected class from all options
+      const options = document.querySelectorAll('.app-option');
+      options.forEach(option => option.classList.remove('selected'));
+      
+      // Add selected class to clicked option
+      element.classList.add('selected');
+      
+      // Set selected app
+      selectedApp = element.getAttribute('data-app');
+      
+      // Update JSON preview
+      updateJsonPreview();
+    }
+    
+    // Fungsi untuk menampilkan section
+    function showSection(sectionId) {
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      document.getElementById(sectionId).classList.remove('hidden');
+      
+      // Update menu aktif
+      document.querySelectorAll('.sidebar li').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+      
+      // Refresh data jika diperlukan
+      if (sectionId === 'userManagement') {
+        fetchUsers();
+        populateResellerFilter();
+      } else if (sectionId === 'dashboard') {
+        updateDashboardStats();
+      } else if (sectionId === 'resellerManagement') {
+        fetchResellers();
+      } else if (sectionId === 'addUser') {
+        populateResellerDropdown();
+      } else if (sectionId === 'userActivity') {
+        fetchUserActivities();
+        populateActivityResellerFilter();
+      } else if (sectionId === 'settings') {
+        loadConfig();
+      } else if (sectionId === 'sendUpdate') {
+        updateJsonPreview();
+        // Reset selected app
+        selectedApp = null;
+        document.querySelectorAll('.app-option').forEach(option => {
+          option.classList.remove('selected');
+        });
+      } else if (sectionId === 'groupChat') {
+        loadChatMessages();
+        populateChatResellerFilter();
+      } else if (sectionId === 'vipManagement') {
+        fetchVipUsers();
+        populateVipResellerFilter();
+      } else if (sectionId === 'addVipUser') {
+        // Reset form
+        document.getElementById('addVipUserForm').reset();
+        populateVipResellerDropdown();
+      }
+    }
+
+    // Update statistik dashboard
+    async function updateDashboardStats() {
+      try {
+        // Ambil data user
+        const usersRes = await fetch(getFirebasePath('licenses'));
+        const usersData = await usersRes.json();
+        const totalUsers = Array.isArray(usersData) ? usersData.length : 0;
+        
+        document.getElementById('totalUsers').textContent = totalUsers;
+        
+        // Hitung user aktif dan expired
+        if (Array.isArray(usersData)) {
+          const now = new Date();
+          const activeLicenses = usersData.filter(user => {
+            const expiryDate = new Date(user.expiresAt);
+            return expiryDate > now;
+          }).length;
+          
+          document.getElementById('activeLicenses').textContent = activeLicenses;
+          document.getElementById('expiredLicenses').textContent = totalUsers - activeLicenses;
+        } else {
+          document.getElementById('activeLicenses').textContent = '0';
+          document.getElementById('expiredLicenses').textContent = '0';
+        }
+        
+        // Ambil data reseller
+        const resellersRes = await fetch(getFirebasePath('resellers'));
+        const resellersData = await resellersRes.json();
+        const totalResellers = Array.isArray(resellersData) ? resellersData.length : 0;
+        document.getElementById('totalResellers').textContent = totalResellers;
+        
+        // Ambil data user VIP
+        const vipUsersRes = await fetch(getFirebasePath('vip'));
+        const vipUsersData = await vipUsersRes.json();
+        const totalVipUsers = vipUsersData && vipUsersData.allowed_devices ? 
+          Object.keys(vipUsersData.allowed_devices).length : 0;
+        document.getElementById('totalVipUsers').textContent = totalVipUsers;
+        
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    // Ambil data user
+    async function fetchUsers() {
+      try {
+        const [usersRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('licenses')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        const usersData = await usersRes.json();
+        const resellersData = await resellersRes.json();
+        const tbody = document.querySelector("#userTable tbody");
+        tbody.innerHTML = "";
+        
+        if (Array.isArray(usersData)) {
+          const now = new Date();
+          
+          usersData.forEach((user, index) => {
+            const expiryDate = new Date(user.expiresAt);
+            const isExpired = expiryDate < now;
+            
+            // Cari nama reseller
+            let resellerName = '-';
+            if (user.resellerId && Array.isArray(resellersData)) {
+              const reseller = resellersData.find(r => r.id === user.resellerId);
+              resellerName = reseller ? reseller.name : 'Unknown';
+            }
+            
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${user.id}</td>
+              <td>${user.username}</td>
+              <td>${user.password}</td>
+              <td>${user.expiresAt}</td>
+              <td>${user.allowOffline ? 'Ya' : 'Tidak'}</td>
+              <td>${resellerName}</td>
+              <td class="status-cell">
+                <span class="badge ${isExpired ? 'badge-expired' : 'badge-active'}">
+                  ${isExpired ? 'Expired' : 'Aktif'}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="edit-btn" onclick="editUser(${index})">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  <button class="delete-btn" onclick="deleteUser(${index})">
+                    <i class="fas fa-trash-alt"></i> Hapus
+                  </button>
+                </div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    }
+
+    // Ambil data user VIP - DIPERBAIKI
+    async function fetchVipUsers() {
+      try {
+        const [vipRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('vip')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        const vipData = await vipRes.json();
+        const resellersData = await resellersRes.json();
+        const tbody = document.querySelector("#vipTable tbody");
+        tbody.innerHTML = "";
+        
+        if (vipData && vipData.allowed_devices) {
+          const now = Date.now();
+          
+          Object.entries(vipData.allowed_devices).forEach(([deviceId, userData]) => {
+            const expiryTime = userData.expiry_time;
+            const isExpired = expiryTime < now;
+            
+            // Cari nama reseller
+            let resellerName = 'Owner';
+            if (userData.resellerId && Array.isArray(resellersData)) {
+              const reseller = resellersData.find(r => r.id === userData.resellerId);
+              resellerName = reseller ? reseller.name : 'Unknown';
+            }
+            
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${deviceId}</td>
+              <td>${userData.name}</td>
+              <td>${new Date(expiryTime).toLocaleDateString()}</td>
+              <td class="status-cell">
+                <span class="badge ${isExpired ? 'badge-expired' : 'badge-vip'}">
+                  ${isExpired ? 'Expired' : 'VIP'}
+                </span>
+              </td>
+              <td>${resellerName}</td>
+              <td>${new Date(userData.created_at).toLocaleDateString()}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="edit-btn" onclick="editVipUser('${deviceId}')">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  <button class="delete-btn" onclick="deleteVipUser('${deviceId}')">
+                    <i class="fas fa-trash-alt"></i> Hapus
+                  </button>
+                </div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching VIP users:", error);
+      }
+    }
+
+    // Tambah user VIP - DIPERBAIKI
+    async function addVipUser(vipUser) {
+      try {
+        const res = await fetch(getFirebasePath('vip'));
+        let vipData = await res.json();
+        
+        if (!vipData) {
+          vipData = { allowed_devices: {} };
+        } else if (!vipData.allowed_devices) {
+          vipData.allowed_devices = {};
+        }
+        
+        // Tambahkan user VIP baru
+        vipData.allowed_devices[vipUser.deviceId] = {
+          name: vipUser.name,
+          expiry_time: vipUser.expiry_time,
+          status: vipUser.status,
+          created_at: vipUser.created_at,
+          resellerId: vipUser.resellerId || null
+        };
+        
+        await fetch(getFirebasePath('vip'), {
+          method: "PUT",
+          body: JSON.stringify(vipData),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        // Catat aktivitas penambahan user VIP
+        await logActivity({
+          type: 'vip_created',
+          deviceId: vipUser.deviceId,
+          name: vipUser.name,
+          resellerId: vipUser.resellerId || null
+        });
+        
+        fetchVipUsers();
+        showSection('vipManagement');
+        updateDashboardStats();
+      } catch (error) {
+        console.error("Error adding VIP user:", error);
+      }
+    }
+
+    // Edit user VIP - DIPERBAIKI
+    async function editVipUser(deviceId) {
+      try {
+        const [vipRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('vip')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        let vipData = await vipRes.json();
+        const resellersData = await resellersRes.json();
+        
+        if (!vipData || !vipData.allowed_devices || !vipData.allowed_devices[deviceId]) {
+          alert("User VIP tidak ditemukan!");
+          return;
+        }
+        
+        const vipUser = vipData.allowed_devices[deviceId];
+        
+        // Tampilkan form edit
+        const newName = prompt("Edit Nama User VIP:", vipUser.name);
+        if (newName === null) return;
+        
+        const newExpiryTime = prompt("Edit Tanggal Expired (YYYY-MM-DD):", 
+          new Date(vipUser.expiry_time).toISOString().split('T')[0]);
+        if (newExpiryTime === null) return;
+        
+        const newStatus = prompt("Edit Status (active/inactive):", vipUser.status);
+        if (newStatus === null) return;
+        
+        // Tampilkan pilihan reseller
+        let resellerOptions = "Owner\n";
+        if (Array.isArray(resellersData)) {
+          resellersData.forEach(reseller => {
+            resellerOptions += `${reseller.id}: ${reseller.name}\n`;
+          });
+        }
+        
+        const newResellerId = prompt(`Edit Reseller:\n${resellerOptions}`, vipUser.resellerId || '');
+        if (newResellerId === null) return;
+        
+        vipData.allowed_devices[deviceId] = {
+          ...vipUser,
+          name: newName,
+          expiry_time: new Date(newExpiryTime).getTime(),
+          status: newStatus,
+          resellerId: newResellerId || null
+        };
+        
+        await fetch(getFirebasePath('vip'), {
+          method: "PUT",
+          body: JSON.stringify(vipData),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        fetchVipUsers();
+      } catch (error) {
+        console.error("Error editing VIP user:", error);
+      }
+    }
+
+    // Hapus user VIP
+    async function deleteVipUser(deviceId) {
+      if (!confirm("Apakah Anda yakin ingin menghapus user VIP ini?")) return;
+      
+      try {
+        const res = await fetch(getFirebasePath('vip'));
+        let vipData = await res.json();
+        
+        if (!vipData || !vipData.allowed_devices || !vipData.allowed_devices[deviceId]) {
+          return;
+        }
+        
+        // Catat aktivitas penghapusan
+        const deletedUser = vipData.allowed_devices[deviceId];
+        await logActivity({
+          type: 'vip_deleted',
+          deviceId: deviceId,
+          name: deletedUser.name,
+          resellerId: deletedUser.resellerId || null
+        });
+        
+        delete vipData.allowed_devices[deviceId];
+        
+        await fetch(getFirebasePath('vip'), {
+          method: "PUT",
+          body: JSON.stringify(vipData),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        fetchVipUsers();
+        updateDashboardStats();
+      } catch (error) {
+        console.error("Error deleting VIP user:", error);
+      }
+    }
+
+    // Populate reseller dropdown di form tambah user
+    async function populateResellerDropdown() {
+      const select = document.getElementById('resellerId');
+      select.innerHTML = '<option value="">Tanpa Reseller</option>';
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          data.forEach(reseller => {
+            const option = document.createElement('option');
+            option.value = reseller.id;
+            option.textContent = reseller.name;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching resellers:", error);
+      }
+    }
+
+    // Populate reseller dropdown di form tambah user VIP - BARU
+    async function populateVipResellerDropdown() {
+      const select = document.getElementById('vipResellerId');
+      select.innerHTML = '<option value="">Tanpa Reseller</option>';
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          data.forEach(reseller => {
+            const option = document.createElement('option');
+            option.value = reseller.id;
+            option.textContent = reseller.name;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching resellers:", error);
+      }
+    }
+
+    // Populate reseller filter di user management
+    async function populateResellerFilter() {
+      const select = document.getElementById('resellerFilter');
+      select.innerHTML = '<option value="">Semua Reseller</option>';
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          data.forEach(reseller => {
+            const option = document.createElement('option');
+            option.value = reseller.id;
+            option.textContent = reseller.name;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching resellers:", error);
+      }
+    }
+
+    // Populate reseller filter di activity log
+    async function populateActivityResellerFilter() {
+      const select = document.getElementById('activityResellerFilter');
+      select.innerHTML = '<option value="">Semua Reseller</option>';
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          data.forEach(reseller => {
+            const option = document.createElement('option');
+            option.value = reseller.id;
+            option.textContent = reseller.name;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching resellers:", error);
+      }
+    }
+
+    // Populate reseller filter di user VIP - BARU
+    async function populateVipResellerFilter() {
+      const select = document.getElementById('vipResellerFilter');
+      select.innerHTML = '<option value="">Semua Reseller</option>';
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          data.forEach(reseller => {
+            const option = document.createElement('option');
+            option.value = reseller.id;
+            option.textContent = reseller.name;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching resellers:", error);
+      }
+    }
+
+    // Populate reseller filter di chat
+    async function populateChatResellerFilter() {
+      const select = document.getElementById('resellerChatFilter');
+      select.innerHTML = '<option value="all">Semua Reseller</option>';
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          data.forEach(reseller => {
+            const option = document.createElement('option');
+            option.value = reseller.id;
+            option.textContent = reseller.name;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching resellers:", error);
+      }
+    }
+
+    // Hapus user
+    async function deleteUser(index) {
+      if (!confirm("Apakah Anda yakin ingin menghapus user ini?")) return;
+      
+      try {
+        const res = await fetch(getFirebasePath('licenses'));
+        let users = await res.json();
+        if (!Array.isArray(users)) return;
+        
+        // Catat aktivitas penghapusan
+        const deletedUser = users[index];
+        await logActivity({
+          type: 'deleted',
+          resellerId: deletedUser.resellerId || null,
+          userId: deletedUser.id,
+          username: deletedUser.username
+        });
+        
+        users.splice(index, 1);
+        await fetch(getFirebasePath('licenses'), {
+          method: "PUT",
+          body: JSON.stringify(users),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        fetchUsers();
+        updateDashboardStats();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
+    }
+
+    // Edit user
+    async function editUser(index) {
+      try {
+        const res = await fetch(getFirebasePath('licenses'));
+        let users = await res.json();
+        if (!Array.isArray(users)) return;
+        
+        const user = users[index];
+        
+        // Tampilkan form edit (bisa dibuat modal atau form terpisah)
+        const newUsername = prompt("Edit Username:", user.username);
+        if (newUsername === null) return;
+        
+        const newPassword = prompt("Edit Password:", user.password);
+        if (newPassword === null) return;
+        
+        const newExpiresAt = prompt("Edit Expiry Date (YYYY-MM-DD):", user.expiresAt);
+        if (newExpiresAt === null) return;
+        
+        user.username = newUsername;
+        user.password = newPassword;
+        user.expiresAt = newExpiresAt;
+        
+        await fetch(getFirebasePath('licenses'), {
+          method: "PUT",
+          body: JSON.stringify(users),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        fetchUsers();
+      } catch (error) {
+        console.error("Error editing user:", error);
+      }
+    }
+
+    // Tambah user baru
+    async function addUser(user) {
+      try {
+        const res = await fetch(getFirebasePath('licenses'));
+        let users = await res.json();
+        if (!Array.isArray(users)) users = [];
+        users.push(user);
+        
+        await fetch(getFirebasePath('licenses'), {
+          method: "PUT",
+          body: JSON.stringify(users),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        // Catat aktivitas penambahan user
+        await logActivity({
+          type: 'created',
+          resellerId: user.resellerId || null,
+          userId: user.id,
+          username: user.username
+        });
+        
+        // Update jumlah user reseller jika ada
+        if (user.resellerId) {
+          await updateResellerUserCount(user.resellerId);
+        }
+        
+        fetchUsers();
+        showSection('userManagement');
+        updateDashboardStats();
+      } catch (error) {
+        console.error("Error adding user:", error);
+      }
+    }
+
+    // Ambil data reseller
+    async function fetchResellers() {
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        const data = await res.json();
+        const tbody = document.querySelector("#resellerTable tbody");
+        tbody.innerHTML = "";
+        
+        if (Array.isArray(data)) {
+          data.forEach((reseller, index) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${reseller.id}</td>
+              <td>${reseller.name}</td>
+              <td>${reseller.coin}</td>
+              <td>${reseller.userCount || 0}</td>
+              <td>
+                <div class="action-buttons">
+                  <button onclick="addResellerCoin(${index})" style="background: #28a745; margin-right: 5px;">
+                    <i class="fas fa-plus"></i> Coin
+                  </button>
+                  <button class="delete-btn" onclick="deleteReseller(${index})">
+                    <i class="fas fa-trash-alt"></i> Hapus
+                  </button>
+                </div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching resellers:", error);
+      }
+    }
+
+    // Tambah coin reseller
+    async function addResellerCoin(index) {
+      const amount = prompt("Masukkan jumlah coin yang akan ditambahkan:");
+      if (!amount || isNaN(amount)) return;
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        let resellers = await res.json();
+        if (!Array.isArray(resellers)) return;
+        
+        resellers[index].coin = (parseInt(resellers[index].coin) || 0) + parseInt(amount);
+        
+        await fetch(getFirebasePath('resellers'), {
+          method: "PUT",
+          body: JSON.stringify(resellers),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        fetchResellers();
+      } catch (error) {
+        console.error("Error adding reseller coin:", error);
+      }
+    }
+
+    // Hapus reseller
+    async function deleteReseller(index) {
+      if (!confirm("Apakah Anda yakin ingin menghapus reseller ini?")) return;
+      
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        let resellers = await res.json();
+        if (!Array.isArray(resellers)) return;
+        
+        // Catat aktivitas penghapusan reseller
+        const deletedReseller = resellers[index];
+        await logActivity({
+          type: 'reseller_deleted',
+          resellerId: deletedReseller.id,
+          resellerName: deletedReseller.name
+        });
+        
+        resellers.splice(index, 1);
+        await fetch(getFirebasePath('resellers'), {
+          method: "PUT",
+          body: JSON.stringify(resellers),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        fetchResellers();
+        updateDashboardStats();
+      } catch (error) {
+        console.error("Error deleting reseller:", error);
+      }
+    }
+
+    // Tambah reseller baru
+    async function addReseller(reseller) {
+      try {
+        const res = await fetch(getFirebasePath('resellers'));
+        let resellers = await res.json();
+        if (!Array.isArray(resellers)) resellers = [];
+        resellers.push(reseller);
+        
+        await fetch(getFirebasePath('resellers'), {
+          method: "PUT",
+          body: JSON.stringify(resellers),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        // Catat aktivitas penambahan reseller
+        await logActivity({
+          type: 'reseller_created',
+          resellerId: reseller.id,
+          resellerName: reseller.name
+        });
+        
+        fetchResellers();
+        showSection('resellerManagement');
+        updateDashboardStats();
+      } catch (error) {
+        console.error("Error adding reseller:", error);
+      }
+    }
+
+    // Update jumlah user reseller
+    async function updateResellerUserCount(resellerId) {
+      try {
+        const [resellersRes, usersRes] = await Promise.all([
+          fetch(getFirebasePath('resellers')),
+          fetch(getFirebasePath('licenses'))
+        ]);
+        
+        let resellers = await resellersRes.json();
+        const users = await usersRes.json();
+        
+        if (!Array.isArray(resellers)) return;
+        
+        const resellerIndex = resellers.findIndex(r => r.id === resellerId);
+        if (resellerIndex === -1) return;
+        
+        // Hitung jumlah user yang dimiliki reseller ini
+        const userCount = Array.isArray(users) ? 
+          users.filter(user => user.resellerId === resellerId).length : 0;
+        
+        resellers[resellerIndex].userCount = userCount;
+        
+        await fetch(getFirebasePath('resellers'), {
+          method: "PUT",
+          body: JSON.stringify(resellers),
+          headers: {"Content-Type": "application/json"}
+        });
+      } catch (error) {
+        console.error("Error updating reseller user count:", error);
+      }
+    }
+
+    // Catat aktivitas
+    async function logActivity(activity) {
+      try {
+        const res = await fetch(getFirebasePath('activities'));
+        let activities = await res.json();
+        if (!Array.isArray(activities)) activities = [];
+        
+        activities.push({
+          timestamp: new Date().toISOString(),
+          ...activity
+        });
+        
+        await fetch(getFirebasePath('activities'), {
+          method: "PUT",
+          body: JSON.stringify(activities),
+          headers: {"Content-Type": "application/json"}
+        });
+      } catch (error) {
+        console.error("Error logging activity:", error);
+      }
+    }
+
+    // Ambil data aktivitas
+    async function fetchUserActivities() {
+      try {
+        const [activitiesRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('activities')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        const activities = await activitiesRes.json();
+        const resellers = await resellersRes.json();
+        const tbody = document.querySelector("#activityTable tbody");
+        tbody.innerHTML = "";
+        
+        if (Array.isArray(activities)) {
+          // Urutkan berdasarkan timestamp terbaru
+          activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          
+          activities.forEach(activity => {
+            let activityText = '';
+            if (activity.type === 'created') {
+              activityText = `Menambahkan user ${activity.username}`;
+            } else if (activity.type === 'deleted') {
+              activityText = `Menghapus user ${activity.username}`;
+            } else if (activity.type === 'reseller_created') {
+              activityText = `Membuat reseller ${activity.resellerName}`;
+            } else if (activity.type === 'reseller_deleted') {
+              activityText = `Menghapus reseller ${activity.resellerName}`;
+            } else if (activity.type === 'update_sent') {
+              activityText = `Mengirim update aplikasi versi ${activity.version}`;
+            } else if (activity.type === 'vip_created') {
+              activityText = `Menambahkan user VIP ${activity.name}`;
+            } else if (activity.type === 'vip_deleted') {
+              activityText = `Menghapus user VIP ${activity.name}`;
+            }
+            
+            // Cari nama reseller
+            let resellerName = 'Owner';
+            if (activity.resellerId && Array.isArray(resellers)) {
+              const reseller = resellers.find(r => r.id === activity.resellerId);
+              resellerName = reseller ? reseller.name : 'Unknown';
+            } else if (activity.resellerName) {
+              resellerName = activity.resellerName;
+            }
+            
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${new Date(activity.timestamp).toLocaleString()}</td>
+              <td>${resellerName}</td>
+              <td>${activityText}</td>
+              <td>${activity.userId || activity.deviceId || '-'}</td>
+              <td>${activity.username || activity.name || '-'}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+      }
+    }
+
+    // Kirim update aplikasi
+    async function sendAppUpdate(updateData, appKey) {
+      try {
+        // Buat objek dengan key yang sesuai dengan aplikasi yang dipilih
+        const updatePayload = {};
+        updatePayload[appKey] = updateData;
+        
+        await fetch(getFirebasePath('update'), {
+          method: "PUT",
+          body: JSON.stringify(updatePayload),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        // Catat aktivitas pengiriman update
+        await logActivity({
+          type: 'update_sent',
+          version: updateData.version,
+          app: appKey
+        });
+        
+        alert(`Update berhasil dikirim ke ${appKey}!`);
+      } catch (error) {
+        console.error("Error sending update:", error);
+        alert("Terjadi kesalahan saat mengirim update.");
+      }
+    }
+    
+    // Update pratinjau JSON
+    function updateJsonPreview() {
+      const version = document.getElementById('updateVersion').value || '2101020001';
+      const title = document.getElementById('updateTitle').value || 'New Update Available';
+      const subtitle = document.getElementById('updateSubtitle').value || 'Update Your Application';
+      const link = document.getElementById('updateLink').value || 'https://www.dpmods.com';
+      const closeButton = document.getElementById('closeButton').value === 'true';
+      
+      const updateData = {
+        version: parseInt(version),
+        title: title,
+        subtitle: subtitle,
+        closeButton: closeButton,
+        link: link
+      };
+      
+      // Tampilkan preview dengan key yang sesuai
+      let previewData = {};
+      if (selectedApp) {
+        previewData[selectedApp] = updateData;
+        document.getElementById('updateJsonPreview').textContent = JSON.stringify(previewData, null, 2);
+      } else {
+        document.getElementById('updateJsonPreview').textContent = "Pilih aplikasi terlebih dahulu untuk melihat pratinjau JSON";
+      }
+    }
+
+    // Fungsi untuk chat group
+    async function loadChatMessages() {
+      try {
+        const res = await fetch(getFirebasePath('chat'));
+        const messages = await res.json();
+        const chatContainer = document.getElementById('chatMessages');
+        chatContainer.innerHTML = '';
+        
+        if (Array.isArray(messages)) {
+          // Urutkan pesan berdasarkan waktu
+          messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+          
+          messages.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${msg.senderType === 'owner' ? 'message-owner' : 'message-reseller'}`;
+            
+            messageDiv.innerHTML = `
+              <div class="message-sender">${msg.senderName}</div>
+              <div class="message-text">${msg.text}</div>
+              <div class="message-time">${new Date(msg.timestamp).toLocaleString()}</div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+          });
+          
+          // Scroll ke bawah
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+      } catch (error) {
+        console.error("Error loading chat messages:", error);
+      }
+    }
+    
+    async function sendChatMessage() {
+      const messageInput = document.getElementById('chatInput');
+      const messageText = messageInput.value.trim();
+      
+      if (!messageText) return;
+      
+      try {
+        const res = await fetch(getFirebasePath('chat'));
+        let messages = await res.json();
+        if (!Array.isArray(messages)) messages = [];
+        
+        // Tambahkan pesan baru
+        messages.push({
+          text: messageText,
+          senderType: 'owner',
+          senderName: 'Owner',
+          timestamp: new Date().toISOString()
+        });
+        
+        // Simpan ke Firebase
+        await fetch(getFirebasePath('chat'), {
+          method: "PUT",
+          body: JSON.stringify(messages),
+          headers: {"Content-Type": "application/json"}
+        });
+        
+        // Kosongkan input
+        messageInput.value = '';
+        
+        // Muat ulang pesan
+        loadChatMessages();
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    }
+
+    // Fungsi pencarian dan filter user
+    document.getElementById("searchInput").addEventListener("input", function(e) {
+      filterUsers();
+    });
+    
+    document.getElementById("resellerFilter").addEventListener("change", function() {
+      filterUsers();
+    });
+    
+    document.getElementById("statusFilter").addEventListener("change", function() {
+      filterUsers();
+    });
+    
+    async function filterUsers() {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      const resellerFilter = document.getElementById("resellerFilter").value;
+      const statusFilter = document.getElementById("statusFilter").value;
+      
+      try {
+        const [usersRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('licenses')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        const users = await usersRes.json();
+        const resellers = await resellersRes.json();
+        const tbody = document.querySelector("#userTable tbody");
+        tbody.innerHTML = "";
+        
+        if (Array.isArray(users)) {
+          const now = new Date();
+          
+          users.forEach((user, index) => {
+            const expiryDate = new Date(user.expiresAt);
+            const isExpired = expiryDate < now;
+            
+            // Cari nama reseller
+            let resellerName = '-';
+            if (user.resellerId && Array.isArray(resellers)) {
+              const reseller = resellers.find(r => r.id === user.resellerId);
+              resellerName = reseller ? reseller.name : 'Unknown';
+            }
+            
+            // Filter berdasarkan kriteria
+            const matchesSearch = 
+              user.id.toLowerCase().includes(searchTerm) || 
+              user.username.toLowerCase().includes(searchTerm);
+            
+            const matchesReseller = 
+              !resellerFilter || 
+              (resellerFilter === '' && !user.resellerId) || 
+              user.resellerId === resellerFilter;
+            
+            const matchesStatus = 
+              !statusFilter || 
+              (statusFilter === 'active' && !isExpired) || 
+              (statusFilter === 'expired' && isExpired);
+            
+            if (matchesSearch && matchesReseller && matchesStatus) {
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${user.id}</td>
+                <td>${user.username}</td>
+                <td>${user.password}</td>
+                <td>${user.expiresAt}</td>
+                <td>${user.allowOffline ? 'Ya' : 'Tidak'}</td>
+                <td>${resellerName}</td>
+                <td class="status-cell">
+                  <span class="badge ${isExpired ? 'badge-expired' : 'badge-active'}">
+                    ${isExpired ? 'Expired' : 'Aktif'}
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="edit-btn" onclick="editUser(${index})">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="delete-btn" onclick="deleteUser(${index})">
+                      <i class="fas fa-trash-alt"></i> Hapus
+                    </button>
+                  </div>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error filtering users:", error);
+      }
+    }
+
+    // Filter aktivitas
+    document.getElementById("activityResellerFilter").addEventListener("change", function() {
+      filterActivities();
+    });
+    
+    document.getElementById("activityTypeFilter").addEventListener("change", function() {
+      filterActivities();
+    });
+    
+    document.getElementById("activityDateFilter").addEventListener("change", function() {
+      filterActivities();
+    });
+    
+    async function filterActivities() {
+      const resellerFilter = document.getElementById("activityResellerFilter").value;
+      const typeFilter = document.getElementById("activityTypeFilter").value;
+      const dateFilter = document.getElementById("activityDateFilter").value;
+      
+      try {
+        const [activitiesRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('activities')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        const activities = await activitiesRes.json();
+        const resellers = await resellersRes.json();
+        const tbody = document.querySelector("#activityTable tbody");
+        tbody.innerHTML = "";
+        
+        if (Array.isArray(activities)) {
+          // Urutkan berdasarkan timestamp terbaru
+          activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          
+          activities.forEach(activity => {
+            const activityDate = new Date(activity.timestamp).toISOString().split('T')[0];
+            
+            // Filter berdasarkan kriteria
+            const matchesReseller = 
+              !resellerFilter || 
+              activity.resellerId === resellerFilter ||
+              (resellerFilter === '' && !activity.resellerId);
+            
+            const matchesType = 
+              !typeFilter || 
+              activity.type === typeFilter ||
+              (typeFilter === 'created' && activity.type === 'created') ||
+              (typeFilter === 'deleted' && activity.type === 'deleted');
+            
+            const matchesDate = 
+              !dateFilter || 
+              activityDate === dateFilter;
+            
+            if (matchesReseller && matchesType && matchesDate) {
+              const tr = document.createElement("tr");
+              
+              let activityText = '';
+              if (activity.type === 'created') {
+                activityText = `Menambahkan user ${activity.username}`;
+              } else if (activity.type === 'deleted') {
+                activityText = `Menghapus user ${activity.username}`;
+              } else if (activity.type === 'reseller_created') {
+                activityText = `Membuat reseller ${activity.resellerName}`;
+              } else if (activity.type === 'reseller_deleted') {
+                activityText = `Menghapus reseller ${activity.resellerName}`;
+              } else if (activity.type === 'update_sent') {
+                activityText = `Mengirim update aplikasi versi ${activity.version} ke ${activity.app}`;
+              } else if (activity.type === 'vip_created') {
+                activityText = `Menambahkan user VIP ${activity.name}`;
+              } else if (activity.type === 'vip_deleted') {
+                activityText = `Menghapus user VIP ${activity.name}`;
+              }
+              
+              // Cari nama reseller
+              let resellerName = 'Owner';
+              if (activity.resellerId && Array.isArray(resellers)) {
+                const reseller = resellers.find(r => r.id === activity.resellerId);
+                resellerName = reseller ? reseller.name : 'Unknown';
+              } else if (activity.resellerName) {
+                resellerName = activity.resellerName;
+              }
+              
+              tr.innerHTML = `
+                <td>${new Date(activity.timestamp).toLocaleString()}</td>
+                <td>${resellerName}</td>
+                <td>${activityText}</td>
+                <td>${activity.userId || activity.deviceId || '-'}</td>
+                <td>${activity.username || activity.name || '-'}</td>
+              `;
+              tbody.appendChild(tr);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error filtering activities:", error);
+      }
+    }
+
+    // Filter user VIP - DIPERBAIKI
+    document.getElementById("vipSearchInput").addEventListener("input", function(e) {
+      filterVipUsers();
+    });
+    
+    document.getElementById("vipStatusFilter").addEventListener("change", function() {
+      filterVipUsers();
+    });
+    
+    document.getElementById("vipResellerFilter").addEventListener("change", function() {
+      filterVipUsers();
+    });
+    
+    async function filterVipUsers() {
+      const searchTerm = document.getElementById("vipSearchInput").value.toLowerCase();
+      const statusFilter = document.getElementById("vipStatusFilter").value;
+      const resellerFilter = document.getElementById("vipResellerFilter").value;
+      
+      try {
+        const [vipRes, resellersRes] = await Promise.all([
+          fetch(getFirebasePath('vip')),
+          fetch(getFirebasePath('resellers'))
+        ]);
+        
+        const vipData = await vipRes.json();
+        const resellersData = await resellersRes.json();
+        const tbody = document.querySelector("#vipTable tbody");
+        tbody.innerHTML = "";
+        
+        if (vipData && vipData.allowed_devices) {
+          const now = Date.now();
+          
+          Object.entries(vipData.allowed_devices).forEach(([deviceId, userData]) => {
+            const expiryTime = userData.expiry_time;
+            const isExpired = expiryTime < now;
+            
+            // Cari nama reseller
+            let resellerName = 'Owner';
+            if (userData.resellerId && Array.isArray(resellersData)) {
+              const reseller = resellersData.find(r => r.id === userData.resellerId);
+              resellerName = reseller ? reseller.name : 'Unknown';
+            }
+            
+            // Filter berdasarkan kriteria
+            const matchesSearch = 
+              deviceId.toLowerCase().includes(searchTerm) || 
+              userData.name.toLowerCase().includes(searchTerm);
+            
+            const matchesStatus = 
+              !statusFilter || 
+              (statusFilter === 'active' && !isExpired) || 
+              (statusFilter === 'expired' && isExpired);
+            
+            const matchesReseller = 
+              !resellerFilter || 
+              (resellerFilter === '' && !userData.resellerId) || 
+              userData.resellerId === resellerFilter;
+            
+            if (matchesSearch && matchesStatus && matchesReseller) {
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${deviceId}</td>
+                <td>${userData.name}</td>
+                <td>${new Date(expiryTime).toLocaleDateString()}</td>
+                <td class="status-cell">
+                  <span class="badge ${isExpired ? 'badge-expired' : 'badge-vip'}">
+                    ${isExpired ? 'Expired' : 'VIP'}
+                  </span>
+                </td>
+                <td>${resellerName}</td>
+                <td>${new Date(userData.created_at).toLocaleDateString()}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="edit-btn" onclick="editVipUser('${deviceId}')">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="delete-btn" onclick="deleteVipUser('${deviceId}')">
+                      <i class="fas fa-trash-alt"></i> Hapus
+                    </button>
+                  </div>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Error filtering VIP users:", error);
+      }
+    }
+
+    // Form tambah user
+    document.getElementById("addUserForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const user = {
+        id: document.getElementById("id").value,
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+        expiresAt: document.getElementById("expiresAt").value,
+        allowOffline: document.getElementById("allowOffline").value === "true",
+        resellerId: document.getElementById("resellerId").value || null
+      };
+      addUser(user);
+      e.target.reset();
+    });
+
+    // Form tambah reseller
+    document.getElementById("addResellerForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const reseller = {
+        id: document.getElementById("newResellerId").value,
+        name: document.getElementById("resellerName").value,
+        coin: document.getElementById("resellerCoin").value,
+        userCount: 0
+      };
+      addReseller(reseller);
+      e.target.reset();
+    });
+    
+    // Form tambah user VIP - DIPERBAIKI
+    document.getElementById("addVipUserForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const vipUser = {
+        deviceId: document.getElementById("vipDeviceId").value,
+        name: document.getElementById("vipName").value,
+        expiry_time: new Date(document.getElementById("vipExpiryTime").value).getTime(),
+        status: document.getElementById("vipStatus").value,
+        resellerId: document.getElementById("vipResellerId").value || null,
+        created_at: Date.now()
+      };
+      addVipUser(vipUser);
+      e.target.reset();
+    });
+    
+    // Form kirim update
+    document.getElementById("updateForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      if (!selectedApp) {
+        alert("Pilih aplikasi terlebih dahulu!");
+        return;
+      }
+      
+      const updateData = {
+        version: parseInt(document.getElementById("updateVersion").value),
+        title: document.getElementById("updateTitle").value,
+        subtitle: document.getElementById("updateSubtitle").value,
+        closeButton: document.getElementById("closeButton").value === "true",
+        link: document.getElementById("updateLink").value
+      };
+      
+      sendAppUpdate(updateData, selectedApp);
+    });
+    
+    // Event listener untuk update pratinjau JSON
+    document.getElementById("updateVersion").addEventListener("input", updateJsonPreview);
+    document.getElementById("updateTitle").addEventListener("input", updateJsonPreview);
+    document.getElementById("updateSubtitle").addEventListener("input", updateJsonPreview);
+    document.getElementById("updateLink").addEventListener("input", updateJsonPreview);
+    document.getElementById("closeButton").addEventListener("change", updateJsonPreview);
+    
+    // Event listener untuk chat
+    document.getElementById("chatSendBtn").addEventListener("click", sendChatMessage);
+    document.getElementById("chatInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
+    
+    // Form pengaturan Firebase
+    document.getElementById("firebaseSettingsForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      databaseConfig = {
+        url: document.getElementById("firebaseUrl").value,
+        paths: {
+          licenses: document.getElementById("licensesPath").value,
+          resellers: document.getElementById("resellersPath").value,
+          activities: document.getElementById("activitiesPath").value,
+          update: document.getElementById("updatePath").value,
+          chat: document.getElementById("chatPath").value,
+          vip: document.getElementById("vipPath").value
+        }
+      };
+      
+      saveConfig();
+      alert("Pengaturan Firebase berhasil disimpan!");
+    });
+    
+    // Form konfigurasi Reseller
+    document.getElementById("resellerConfigForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      resellerConfig = {
+        apiKey: document.getElementById("resellerApiKey").value,
+        defaultFirebaseUrl: document.getElementById("resellerFirebaseUrl").value,
+        allowCustomFirebase: document.getElementById("allowResellerCustomFirebase").checked
+      };
+      
+      saveConfig();
+      alert("Konfigurasi Reseller berhasil disimpan!");
+    });
+    
+    // Form konfigurasi API
+    document.getElementById("apiConfigForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      apiConfig = {
+        endpoint: document.getElementById("apiEndpoint").value,
+        apiKey: document.getElementById("apiKey").value,
+        apiSecret: document.getElementById("apiSecret").value
+      };
+      
+      saveConfig();
+      alert("Konfigurasi API berhasil disimpan!");
+    });
+
+    // Login form submission
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      login(email, password);
+    });
+
+    // Inisialisasi halaman
+    document.addEventListener("DOMContentLoaded", function() {
+      // Check if user is already logged in
+      // Firebase auth state observer will handle the UI changes
+    });
+  </script>
+</body>
+</html>
